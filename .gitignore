@@ -1,0 +1,16 @@
+# 忽略数据集和权重模型
+checkpoints/
+results/
+*.pth
+*.tif
+*.npy
+*.h5
+*.mat
+
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+
+# 忽略 VS Code 配置文件
+.vscode/
+*.zip
