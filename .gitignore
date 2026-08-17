@@ -13,4 +13,4 @@ __pycache__/
 
 # 忽略 VS Code 配置文件
 .vscode/
-*.zip
+*.ziparchive/ 
