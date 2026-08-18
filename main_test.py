@@ -1,10 +1,11 @@
 import math
 import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import torch
 import torch.optim
 from torch import nn
 from models import baseNet
-from data_loader import build_data_loader
+from data_loader import build_data_loader, build_test_loader
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
@@ -17,7 +18,6 @@ torch.backends.cuda.matmul.allow_tf32 = True
 
 
 def str2bool(v):
-    """自定义布尔参数解析器，彻底阻断 argparse 的 type=bool 陷阱"""
     if isinstance(v, bool):
         return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -28,63 +28,58 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-def parse_tuple(s):
-    """解析形如 '(0.9, 0.999)' 或 '0.9,0.999' 的字符串为 float 元组"""
-    try:
-        return tuple(map(float, s.strip('()[]').split(',')))
-    except Exception:
-        raise argparse.ArgumentTypeError("Tuple must be like '(0.9,0.999)' or '0.9,0.999'")
-
-
 def args_parser():
     project_name = 'own'
     parser = argparse.ArgumentParser()
-    parser.add_argument('-results', type=str, default='./results/')
-    parser.add_argument('-checkpoints', type=str, default='./checkpoints/')
-    parser.add_argument('-project_name', type=str, default=project_name)
-    parser.add_argument('-dataset', type=str, default='PaviaU',
-                        choices=['PaviaU', 'Houston'])
+    parser.add_argument('--results', type=str, default='./results/')
+    parser.add_argument('--checkpoints', type=str, default='./checkpoints/')
+    parser.add_argument('--project_name', type=str, default=project_name)
+    parser.add_argument('--dataset', type=str, default='PaviaU', choices=['PaviaU', 'Houston'])
 
-    # dataset setting
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--train_ratio', type=float, default=0.01,
-                        help='samples for training')
+    parser.add_argument('--train_ratio', type=float, default=0.01)
     parser.add_argument('--val_ratio', type=float, default=0.01)
-    parser.add_argument('--is_train', type=str2bool, default=True,
-                        help='train or test')
-    parser.add_argument('--is_outimg', type=str2bool, default=False,
-                        help='output all image or not')
-    parser.add_argument('--modelfile', type=str, default='./checkpoints/own/PaviaU/model_95.39.pth')
-    parser.add_argument('--seed', type=int, default=300,
-                        help='random seed')
-    parser.add_argument('--PCA', type=int, default=None, help='PCA')
+    parser.add_argument('--is_train', type=str2bool, default=False)
+    parser.add_argument('--is_outimg', type=str2bool, default=False)
+    parser.add_argument('--modelfile', type=str, default='./checkpoints/own/PaviaU/model_17.52.pth')
+    parser.add_argument('--seed', type=int, default=300)
+    parser.add_argument('--PCA', type=int, default=None)
+    
+    parser.add_argument('--patch_size', type=int, default=7)
+    parser.add_argument('--num_class', type=int, default=9)
+    parser.add_argument('--hsi_bands', type=int, default=103)
 
     args = parser.parse_args()
     return args
-
-
-def custom_repr(self):
-    return f'{{Tensor:{tuple(self.shape)}}} {original_repr(self)}'
-
-
-original_repr = torch.Tensor.__repr__
-torch.Tensor.__repr__ = custom_repr
 
 
 def test(model, device, test_loader, args):
     model.eval()
     count = 0
     with torch.no_grad():
-        for inputs_1, labels in test_loader:
-            inputs_1 = inputs_1.to(device)
-            labels = labels.to(device)
-
-            if args.PCA is not None:
-                inputs_1 = inputs_1.view(-1, args.PCA, args.patch_size, args.patch_size)
+        for batch in test_loader:
+            if isinstance(batch, (list, tuple)):
+                inputs_1 = batch[0]
+                labels = batch[1]
             else:
-                inputs_1 = inputs_1.view(-1, args.hsi_bands, args.patch_size, args.patch_size)
+                inputs_1 = batch
+                labels = batch
+            
+            if isinstance(inputs_1, np.ndarray):
+                inputs_1 = torch.from_numpy(inputs_1)
+            if isinstance(labels, np.ndarray):
+                labels = torch.from_numpy(labels)
+            
+            inputs_1 = inputs_1.float().to(device)
+            labels = labels.long().to(device)
+
+            # 强制校准物理尺寸
+            channels = args.PCA if args.PCA is not None else args.hsi_bands
+            inputs_1 = inputs_1.view(-1, channels, args.patch_size, args.patch_size)
+            
             outputs = model(inputs_1)
             outputs = np.argmax(outputs.detach().cpu().numpy(), axis=1)
+            
             if count == 0:
                 y_pred_test = outputs
                 test_labels = labels.cpu().numpy()
@@ -93,14 +88,12 @@ def test(model, device, test_loader, args):
                 y_pred_test = np.concatenate((y_pred_test, outputs))
                 test_labels = np.concatenate((test_labels, labels.cpu().numpy()))
 
-    # 计算 OA
     a = 0
     for c in range(len(y_pred_test)):
         if test_labels[c] == y_pred_test[c]:
             a = a + 1
     oa = a / len(y_pred_test) * 100
 
-    # 计算 AA
     num_classes = args.num_class
     class_correct = np.zeros(num_classes)
     class_total = np.zeros(num_classes)
@@ -114,7 +107,6 @@ def test(model, device, test_loader, args):
     class_accuracy = class_correct / class_total
     aa = np.mean(class_accuracy) * 100
 
-    # 计算 Kappa
     total_samples = len(test_labels)
     true_count = np.zeros(num_classes)
     pred_count = np.zeros(num_classes)
@@ -140,6 +132,7 @@ def test(model, device, test_loader, args):
     print(' [The test OA is: %.2f]' % (oa))
     print(' [The test AA is: %.2f]' % (aa))
     print(' [The test Kappa is: %.2f]' % (kappa_percentage))
+    
     with open(args.log_file, 'a') as appender:
         appender.write('\n')
         appender.write('########################### Test ###########################' + '\n')
@@ -151,7 +144,6 @@ def test(model, device, test_loader, args):
 
 def main():
     args = args_parser()
-    print(args)
     model_dir_path = os.path.join(args.results, args.project_name + '/', args.dataset + '/')
     log_file = os.path.join(args.results, args.project_name + '/', args.dataset + '/log.txt')
 
@@ -159,7 +151,11 @@ def main():
     os.makedirs(args.checkpoints + args.project_name + '/' + args.dataset + '/', exist_ok=True)
     args.log_file = log_file
 
-    _, _, test_loader = build_data_loader(args)
+    # ==========================================
+    # 核心管线劫持：强行写入 True 开启训练集的构建逻辑
+    # 彻底阻断 data_loader 抛出残缺的一维矩阵
+    # ==========================================
+    test_loader = build_test_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if args.PCA is None:

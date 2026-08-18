@@ -368,3 +368,10 @@ def build_data_cacf_loader(args):
         else:
             X = padWithZeros(X, args.patch_size // 2)
         return X, y
+def build_test_loader(args):
+    """为测试脚本提供不破坏 args.is_train 语义的测试集 DataLoader"""
+    import copy
+    tmp_args = copy.copy(args)
+    tmp_args.is_train = True
+    _, _, test_loader = build_data_loader(tmp_args)
+    return test_loader    
