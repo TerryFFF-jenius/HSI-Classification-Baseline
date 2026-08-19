@@ -144,6 +144,6 @@ class baseNet(nn.Module):
 
 if __name__ == '__main__':
     model = baseNet(12, 9)
-#   x = torch.randn(2, 12, 7, 7)
+    x = torch.randn(2, 12, 7, 7)
     y = model(x)
-    print(y.shape)
+    print(y.shape)  # 应输出 torch.Size([2, 9])
