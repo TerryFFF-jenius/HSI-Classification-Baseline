@@ -45,7 +45,7 @@ def args_parser():
                         help='random seed')
     parser.add_argument('--PCA', type=int, default=None, help='PCA')
     parser.add_argument('--allimg', type=str2bool, default=False, help='allimg')
-
+    parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
     args = parser.parse_args()
     return args
 
@@ -91,14 +91,15 @@ def pred_allimg(model, device, X, y, args):
             if i % 20 == 0:
                 print('... ... row ', i, ' handling ... ...')
 
+    exp_dir = f"exp_{args.exp_id}"
+    out_dir = os.path.join(args.results, args.project_name, args.dataset, exp_dir)
+    os.makedirs(out_dir, exist_ok=True)
+    
     if args.allimg:
-        finalmodelfile = os.path.join(
-            args.results, args.project_name, args.dataset, 'All_PRED.tif')
+        finalmodelfile = os.path.join(out_dir, 'All_PRED.tif')
         trans_tif(outputs, finalmodelfile)
     else:
-        finalmodelfile = os.path.join(
-            args.results, args.project_name, args.dataset, 'Label_PRED.tif')
-        # 防御性拷贝：避免修改原始标签数组
+        finalmodelfile = os.path.join(out_dir, 'Label_PRED.tif')
         y_mask = y.copy()
         y_mask[y_mask != 0] = 1
         outputs = outputs * y_mask

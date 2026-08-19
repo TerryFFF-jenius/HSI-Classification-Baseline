@@ -11,7 +11,7 @@ class Attention(nn.Module):
         self.GAP = nn.AdaptiveAvgPool3d(1)
         self.conv = nn.Conv3d(1,1,kernel_size=(n, 1, 1),padding=((n-1)//2,0,0))
 
-        self.AvgPool = nn.AvgPool3d((in_channels//2,1,1))# 黄河口设为（9,1,1），其余为（10,1,1）
+        self.AvgPool = nn.AvgPool3d((in_channels//2,1,1))
         self.conv1 = nn.Conv3d(nin, nin, kernel_size=(1, n, n), stride=1, padding=(0, (n - 1) // 2, (n - 1) // 2))
 
         self.fc1 = nn.Linear(nin, nin // 8, bias=False)
@@ -94,7 +94,7 @@ class baseNet(nn.Module):
         self.conv3d_2 = nn.Sequential(
             nn.BatchNorm3d(160),
             nn.ReLU(inplace=True),
-            nn.Conv3d(160, 256, kernel_size=(in_channels//2, 1, 1), stride=1,)#黄河口设为（9,1,1），其余为（10,1,1）
+            nn.Conv3d(160, 256, kernel_size=(in_channels//2, 1, 1), stride=1,)
         )
         self.conv3d_3 = nn.Sequential(
             nn.BatchNorm3d(1),
@@ -104,7 +104,7 @@ class baseNet(nn.Module):
 
         self.MaxPool = nn.MaxPool3d((1, 7, 7))
         self.conv3d_4 = nn.Sequential(
-            nn.BatchNorm3d(64),#黄河口时隐藏
+            nn.BatchNorm3d(64),
             nn.ReLU(inplace=True),
             nn.Conv3d(64, 64, kernel_size=(1, 3, 3), stride=1,padding=(0,1,1))
         )
@@ -143,7 +143,7 @@ class baseNet(nn.Module):
         return out
 
 if __name__ == '__main__':
-    model = baseNet(128, 10)
-    x = torch.randn(2, 128, 9, 9)
+    model = baseNet(12, 9)
+#   x = torch.randn(2, 12, 7, 7)
     y = model(x)
     print(y.shape)

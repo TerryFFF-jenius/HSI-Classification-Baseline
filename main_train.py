@@ -75,7 +75,7 @@ def args_parser():
     parser.add_argument('--seed', type=int, default=300,
                         help='random seed')
     parser.add_argument('--PCA', type=int, default=None, help='PCA')
-
+    parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
     args = parser.parse_args()
     return args
 
@@ -120,7 +120,7 @@ def train(model, device, train_loader, optimizer, epoch, args):
         appender.write(content + '\n')
 
 
-def val(model, device, loader, epoch, args):
+def val(model, device, loader, epoch, args, mode='Verification'):
     """验证/测试通用评估函数。传入 val_loader 即做验证，传入 test_loader 即做测试。"""
     model.eval()
     count = 0
@@ -192,7 +192,7 @@ def val(model, device, loader, epoch, args):
     print(' [The verification Kappa is: %.2f]' % (kappa_percentage))
     with open(args.log_file, 'a') as appender:
         appender.write('\n')
-        appender.write('########################### Verification ###########################' + '\n')
+        appender.write('########################### ' + mode + ' ###########################' + '\n')
         appender.write(' epoch: %d' % (epoch) + ' [The verification OA is: %.2f]' % (oa) + ' [The verification AA is: %.2f]' % (aa) +
                        ' [The verification Kappa is: %.2f]' % (kappa_percentage) + '\n')
         appender.write('\n')
@@ -202,12 +202,16 @@ def val(model, device, loader, epoch, args):
 def main():
     args = args_parser()
     print(args)
-    model_dir_path = os.path.join(args.results, args.project_name + '/', args.dataset + '/')
-    log_file = os.path.join(args.results, args.project_name + '/', args.dataset + '/log.txt')
-
+    
+    exp_dir = f"exp_{args.exp_id}"
+    model_dir_path = os.path.join(args.results, args.project_name, args.dataset, exp_dir)
+    ckpt_dir = os.path.join(args.checkpoints, args.project_name, args.dataset, exp_dir)
+    
     os.makedirs(model_dir_path, exist_ok=True)
-    os.makedirs(args.checkpoints + args.project_name + '/' + args.dataset + '/', exist_ok=True)
-    args.log_file = log_file
+    os.makedirs(ckpt_dir, exist_ok=True)
+    
+    args.log_file = os.path.join(model_dir_path, 'log.txt')
+    args.ckpt_dir = ckpt_dir
 
     train_loader, val_loader, test_loader = build_data_loader(args)
 
@@ -228,7 +232,7 @@ def main():
             if acc >= best_acc:
                 best_acc = acc
                 print("save model")
-                checkpointsmodelfile = os.path.join(args.checkpoints, args.project_name, args.dataset, 'model_%.2f.pth' % best_acc)
+                checkpointsmodelfile = os.path.join(args.ckpt_dir, 'model_%.2f.pth' % best_acc)
                 torch.save(model.state_dict(), checkpointsmodelfile)
 
 

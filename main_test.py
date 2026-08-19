@@ -43,12 +43,13 @@ def args_parser():
     parser.add_argument('--is_outimg', type=str2bool, default=False)
     parser.add_argument('--modelfile', type=str, default='./checkpoints/own/PaviaU/model_17.52.pth')
     parser.add_argument('--seed', type=int, default=300)
-    parser.add_argument('--PCA', type=int, default=None)
+    
     
     parser.add_argument('--patch_size', type=int, default=7)
     parser.add_argument('--num_class', type=int, default=9)
     parser.add_argument('--hsi_bands', type=int, default=103)
-
+    parser.add_argument('--PCA', type=int, default=None)
+    parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
     args = parser.parse_args()
     return args
 
@@ -144,12 +145,13 @@ def test(model, device, test_loader, args):
 
 def main():
     args = args_parser()
-    model_dir_path = os.path.join(args.results, args.project_name + '/', args.dataset + '/')
-    log_file = os.path.join(args.results, args.project_name + '/', args.dataset + '/log.txt')
-
+    
+    exp_dir = f"exp_{args.exp_id}"
+    model_dir_path = os.path.join(args.results, args.project_name, args.dataset, exp_dir)
+    
     os.makedirs(model_dir_path, exist_ok=True)
-    os.makedirs(args.checkpoints + args.project_name + '/' + args.dataset + '/', exist_ok=True)
-    args.log_file = log_file
+    
+    args.log_file = os.path.join(model_dir_path, 'log.txt')
 
     # ==========================================
     # 核心管线劫持：强行写入 True 开启训练集的构建逻辑

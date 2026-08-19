@@ -1,3 +1,9 @@
+"""
+Contrastive Method: Lite-HCNet
+Source: Li et al., "Lite-HCNet: A Lightweight Hybrid Convolutional Network for 
+        Hyperspectral Image Classification", IEEE TGRS, 2023.
+This implementation is adapted from the official code for fair comparison.
+"""
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -512,8 +518,7 @@ batch_size = 16
 # IP数据集
 # data = 'IP'
 # class_num = 16
-# X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Indian_pines_corrected.mat')['indian_pines_corrected']
-# y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Indian_pines_gt.mat')['indian_pines_gt']
+
 # patch_size =19 # 每个像素周围提取 patch 的尺寸
 # pca_components =15 # 使用 PCA 降维，得到主成分的数量
 # UP数据集
@@ -526,20 +531,17 @@ pca_components =12 # 使用 PCA 降维，得到主成分的数量
 # SA数据集
 # data = 'SA'
 # class_num = 16
-# X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Salinas_corrected.mat')['salinas_corrected']
-# y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Salinas_gt.mat')['salinas_gt']
+
 # HU数据集
 # data = 'HU'
 # class_num = 15
-# X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\HoustonU\Houston.mat')['Houston']
-# y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\HoustonU\Houston_gt.mat')['Houston_gt']
+
 # patch_size =7 # 每个像素周围提取 patch 的尺寸
 # pca_components =17 # 使用 PCA 降维，得到主成分的数量
 # YRD数据集
 # data = 'YRD'
 # class_num = 8
-# X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\GF5_462_617.mat')['data']
-# y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\gt_GF5_462_617.mat')['label']
+
 # patch_size =11 # 每个像素周围提取 patch 的尺寸
 # pca_components =17 # 使用 PCA 降维，得到主成分的数量
 
@@ -718,7 +720,7 @@ if __name__ == "__main__":
         # if epoch > epochs-10:
         #  if loss.item() < min_loss:
         #     min_loss = loss.item()
-        #     torch.save(net.state_dict(), 'D:\PycharmProjects\HSI\Summary of Three Projects During M.D/Lite-HCNet-2023 IEEE TGRS\Result/'+data+'-'+train_ratio+'.pth')
+        
         # print("save model")
         scheduler.step()
     # print('Finished Training')
@@ -726,7 +728,7 @@ if __name__ == "__main__":
     print('Training complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
-    # net.load_state_dict(torch.load('D:\PycharmProjects\HSI\Summary of Three Projects During M.D/Lite-HCNet-2023 IEEE TGRS\Result/'+data+'-'+train_ratio+'.pth'),strict=False)
+
     classification, labels, confusion, oa, each_acc, aa, kappa = reports(test_loader, ytest, data)
     cm = confusion.astype('float') / confusion.sum(axis=1)[:, np.newaxis]  # 归一化
     plot_confusion_matrix(cm, labels, 'confusion_matrix')  # 绘制混淆矩阵图，可视化
@@ -748,20 +750,16 @@ if __name__ == "__main__":
 # 可视化结果生成
 # load the original image
     # IP数据集
-    # X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Indian_pines_corrected.mat')['indian_pines_corrected']
-    # y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Indian_pines_gt.mat')['indian_pines_gt']
+    
     # UP数据集
     X = sio.loadmat('./oridata/PaviaU/PaviaU.mat')['paviaU']
     y = sio.loadmat('./oridata/PaviaU/PaviaU_gt.mat')['paviaU_gt']
     # SA数据集
-    # X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Salinas_corrected.mat')['salinas_corrected']
-    # y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\Salinas_gt.mat')['salinas_gt']
+    
     # HU数据集
-    # X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\HoustonU\Houston.mat')['Houston']
-    # y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\HoustonU\Houston_gt.mat')['Houston_gt']
+    
     # YRD数据集
-    # X = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\GF5_462_617.mat')['data']
-    # y = sio.loadmat('D:\PycharmProjects\HSI\Various documents\data\gt_GF5_462_617.mat')['label']
+    
 
     height = y.shape[0]
     width = y.shape[1]
