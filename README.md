@@ -1,15 +1,11 @@
 # HSI Classification Baseline
 
-## Codebase Acknowledgment
+## Acknowledgment
 
-The baseline network (`models/baseline_net.py`) is developed based on the open-source 
-3D CNN framework from the **AsyFFNet** project (Asymmetric Feature Fusion Network for HSI Classification).
-We restructured the feature extraction pipeline by:
-- Introducing multi-scale 3D dense connection units (Unit blocks with kernel sizes 3, 5, 7).
-- Integrating a tri-branch attention mechanism (spectral-spatial-channel).
-
-All contrastive methods under `compare/` (e.g., Lite-HCNet) are included for fair 
-evaluation and will be properly cited in our manuscript.
+This repository contains experimental code for hyperspectral image classification research.
+The baseline network implementation is inspired by existing open-source 3D CNN frameworks
+for HSI classification. All methods under `compare/` are included for fair evaluation
+and properly cited in our manuscript.
 
 ## Environment
 - Python 3.x
