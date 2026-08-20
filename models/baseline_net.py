@@ -5,24 +5,29 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class Attention(nn.Module):
+    """底层物理级修复：仅针对 SE 支路的 160 维通道坍塌进行 1D 卷积重建"""
     def __init__(self, n, nin, in_channels):
         super(Attention, self).__init__()
         self.sigmoid = nn.Sigmoid()
         self.GAP = nn.AdaptiveAvgPool3d(1)
-        self.conv = nn.Conv3d(1,1,kernel_size=(n, 1, 1),padding=((n-1)//2,0,0))
+        # 将 3D Conv 改为纯正的 1D ECA 跨通道交互
+        self.conv = nn.Conv1d(1, 1, kernel_size=n, padding=(n-1)//2)
 
         self.AvgPool = nn.AvgPool3d((in_channels//2,1,1))
         self.conv1 = nn.Conv3d(nin, nin, kernel_size=(1, n, n), stride=1, padding=(0, (n - 1) // 2, (n - 1) // 2))
 
         self.fc1 = nn.Linear(nin, nin // 8, bias=False)
-
-        self.fc2 = nn.Linear(nin// 8, nin, bias=False)
+        self.fc2 = nn.Linear(nin // 8, nin, bias=False)
 
     def forward(self, x):
-        n1,c,l,w,h = x.shape
-        se = self.sigmoid(self.conv (self.GAP(x.permute(0, 2, 1,3,4)).permute(0, 2, 1,3,4)))
+        n1, c, l, w, h = x.shape
+        
+        # 修复 SE 支路：先 GAP 保留 C 维，再用 Conv1d 交互
+        se_pool = self.GAP(x).view(n1, 1, c) 
+        se = self.sigmoid(self.conv(se_pool).view(n1, c, 1, 1, 1))
 
-        sa = self.sigmoid(self.conv1 (self.AvgPool(x)))
+        # SA 与 CA 支路保持原汁原味的学术逻辑不变
+        sa = self.sigmoid(self.conv1(self.AvgPool(x)))
 
         x1 = self.GAP(x)
         x1 = x1.reshape(n1, -1)
@@ -30,11 +35,10 @@ class Attention(nn.Module):
         f2 = self.fc2(f1)
 
         ca = self.sigmoid(f2)
-        ca = ca.reshape(n1, c,1,1,1)
+        ca = ca.reshape(n1, c, 1, 1, 1)
 
-        w = se*sa*ca
-        out = x*w
-
+        w = se * sa * ca
+        out = x * w
         return out
 
 class Unit(nn.Module):
