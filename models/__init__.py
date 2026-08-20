@@ -5,7 +5,8 @@ import torch.nn as nn
 from .baseline_net import baseNet
 from compare.cacft_net import CACFTNet
 from compare.lite_hcnet import LiteHCNetWrapper
-from compare.lssan import LSSAN  # [新增] 导入 LSSAN
+from compare.lssan import LSSAN
+from compare.msdan import MSDAN  # [新增] 导入 MSDAN
 
 class Wrapper5Dto4D(nn.Module):
     """通用降维拦截器：将主干传入的 5D 张量剥离为 4D 供对比网络使用"""
@@ -21,7 +22,8 @@ _MODEL_REGISTRY = {
     'baseline': baseNet,
     'cacft': CACFTNet,
     'lite_hcnet': LiteHCNetWrapper,
-    'lssan': LSSAN,  # [新增] 挂载模型
+    'lssan': LSSAN,
+    'msdan': MSDAN,  # [新增] 挂载模型
 }
 
 def build_model(model_name, in_channels, num_classes, patch_size=7):
@@ -37,7 +39,9 @@ def build_model(model_name, in_channels, num_classes, patch_size=7):
     elif model_name == 'lite_hcnet':
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'lssan':
-        # [新增] LSSAN 也是 4D 网络，注入参数并套上 5D 拦截器
         return Wrapper5Dto4D(model_cls(in_channels, num_classes))
+    elif model_name == 'msdan':
+        # [新增] MSDAN 原生吸收 5D，直接注入所有参数后放行，无需 Wrapper
+        return model_cls(in_channels, num_classes, patch_size)
     else:
         return model_cls(in_channels, num_classes, patch_size)
