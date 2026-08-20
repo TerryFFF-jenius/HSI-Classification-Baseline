@@ -158,30 +158,30 @@ class TestDS(torch.utils.data.Dataset):
 
 
 def _load_dataset(args):
-    """统一数据集加载与元信息注入"""
+    """严禁覆盖用户命令行传入的参数，仅在缺失时注入默认值"""
     if args.dataset == 'PaviaU':
         X = sio.loadmat('./oridata/PaviaU/PaviaU.mat')['paviaU']
         y = sio.loadmat('./oridata/PaviaU/PaviaU_gt.mat')['paviaU_gt']
-        args.hsi_bands = X.shape[2]
-        args.num_class = 9
-        args.patch_size = 7
-        args.PCA = 12
+        default_bands, default_class, default_patch, default_pca = X.shape[2], 9, 7, 12
     elif args.dataset == 'Houston':
         X = sio.loadmat('./oridata/Houston/Houston.mat')['Houston']
         y = sio.loadmat('./oridata/Houston/Houston_gt.mat')['Houston_gt']
-        args.hsi_bands = X.shape[2]
-        args.num_class = 15
-        args.patch_size = 7
-        args.PCA = 17
+        default_bands, default_class, default_patch, default_pca = X.shape[2], 15, 7, 17
     elif args.dataset == 'IP':
         X = sio.loadmat('./oridata/Indian_pines/Indian_pines_corrected.mat')['indian_pines_corrected']
         y = sio.loadmat('./oridata/Indian_pines/Indian_pines_gt.mat')['indian_pines_gt']
-        args.hsi_bands = X.shape[2]
-        args.num_class = 16
-        args.patch_size = 19
-        args.PCA = 15
+        default_bands, default_class, default_patch, default_pca = X.shape[2], 16, 19, 15
     else:
         raise ValueError(f"Unknown dataset: {args.dataset}")
+
+    # 使用 getattr 安全注入，绝对不覆盖已存在的命令行参数
+    if getattr(args, 'hsi_bands', None) is None: args.hsi_bands = default_bands
+    if getattr(args, 'num_class', None) is None: args.num_class = default_class
+    if getattr(args, 'patch_size', None) is None: args.patch_size = default_patch
+    if getattr(args, 'PCA', None) is None: args.PCA = default_pca
+    
+    args.in_channels = args.PCA if args.PCA is not None else args.hsi_bands
+
     print('Hyperspectral data shape: ', X.shape)
     print('Label shape: ', y.shape)
     return X, y
