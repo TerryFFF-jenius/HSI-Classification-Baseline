@@ -163,7 +163,7 @@ def main():
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
-    model = build_model(args.model_name, args.in_channels, args.num_class).to(device)
+    model = build_model(args.model_name, args.in_channels, args.num_class, args.patch_size).to(device)
 
     model.load_state_dict(torch.load(args.modelfile, weights_only=True))
     test(model, device, test_loader, args)
