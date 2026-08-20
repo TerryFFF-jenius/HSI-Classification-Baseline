@@ -51,7 +51,7 @@ def args_parser():
     parser.add_argument('--patch_size', type=int, default=None)
     parser.add_argument('--PCA', type=int, default=None)
     
-    parser.add_argument('--model_name', type=str, default='baseline', choices=['baseline', 'cacft', 'lite_hcnet'], help='Model routing')
+    parser.add_argument('--model_name', type=str, default='baseline', choices=['baseline', 'cacft', 'lite_hcnet', 'lssan'], help='Model routing')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
     args = parser.parse_args()
     return args
