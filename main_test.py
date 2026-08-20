@@ -45,10 +45,13 @@ def args_parser():
     parser.add_argument('--seed', type=int, default=300)
     
     
-    parser.add_argument('--patch_size', type=int, default=7)
-    parser.add_argument('--num_class', type=int, default=9)
-    parser.add_argument('--hsi_bands', type=int, default=103)
+    # 彻底解除硬编码，交由 DataLoader 动态注入
+    parser.add_argument('--num_class', type=int, default=None)
+    parser.add_argument('--hsi_bands', type=int, default=None)
+    parser.add_argument('--patch_size', type=int, default=None)
     parser.add_argument('--PCA', type=int, default=None)
+    
+    parser.add_argument('--model_name', type=str, default='baseline', choices=['baseline', 'cacft'], help='Model routing')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
     args = parser.parse_args()
     return args
@@ -74,9 +77,8 @@ def test(model, device, test_loader, args):
             inputs_1 = inputs_1.float().to(device)
             labels = labels.long().to(device)
 
-            # 强制校准物理尺寸
-            channels = args.PCA if args.PCA is not None else args.hsi_bands
-            inputs_1 = inputs_1.view(-1, channels, args.patch_size, args.patch_size)
+                        # 数据管道已保证 5D 格式 (B, 1, C, H, W)，直接送入模型
+            pass
             
             outputs = model(inputs_1)
             outputs = np.argmax(outputs.detach().cpu().numpy(), axis=1)
@@ -160,10 +162,8 @@ def main():
     test_loader = build_test_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if args.PCA is None:
-        model = baseNet(args.hsi_bands, args.num_class).to(device)
-    else:
-        model = baseNet(args.PCA, args.num_class).to(device)
+    from models import build_model
+    model = build_model(args.model_name, args.in_channels, args.num_class).to(device)
 
     model.load_state_dict(torch.load(args.modelfile, weights_only=True))
     test(model, device, test_loader, args)

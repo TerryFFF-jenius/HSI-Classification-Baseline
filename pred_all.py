@@ -46,6 +46,15 @@ def args_parser():
     parser.add_argument('--PCA', type=int, default=None, help='PCA')
     parser.add_argument('--allimg', type=str2bool, default=False, help='allimg')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
+    # === 新增：注册动态维度参数（接收终端输入，若无则设为 None 交由 data_loader 填充） ===
+    parser.add_argument('--num_class', type=int, default=None)
+    parser.add_argument('--hsi_bands', type=int, default=None)
+    parser.add_argument('--patch_size', type=int, default=None)
+    
+    # === 新增：注册模型路由参数 ===
+    parser.add_argument('--model_name', type=str, default='baseline', choices=['baseline', 'cacft'], help='Model routing')
+    parser.add_argument('--band_patches', type=int, default=1, help='CACFTNet param')
+    parser.add_argument('--mode', choices=['ViT', 'CAF'], default='CAF', help='CACFTNet param')
     args = parser.parse_args()
     return args
 
@@ -119,10 +128,8 @@ def main():
     X, y = build_data_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if args.PCA is None:
-        model = baseNet(args.hsi_bands, args.num_class).to(device)
-    else:
-        model = baseNet(args.PCA, args.num_class).to(device)
+    from models import build_model
+    model = build_model(args.model_name, args.in_channels, args.num_class).to(device)
 
     model.load_state_dict(torch.load(args.checkpointsmodelfile, weights_only=True))
     pred_allimg(model, device, X, y, args)

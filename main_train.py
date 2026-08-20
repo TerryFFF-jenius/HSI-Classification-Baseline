@@ -76,6 +76,15 @@ def args_parser():
                         help='random seed')
     parser.add_argument('--PCA', type=int, default=None, help='PCA')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
+    # === 新增：注册动态维度参数（接收终端输入，若无则设为 None 交由 data_loader 填充） ===
+    parser.add_argument('--num_class', type=int, default=None)
+    parser.add_argument('--hsi_bands', type=int, default=None)
+    parser.add_argument('--patch_size', type=int, default=None)
+    
+    # === 新增：注册模型路由参数 ===
+    parser.add_argument('--model_name', type=str, default='baseline', choices=['baseline', 'cacft'], help='Model routing')
+    parser.add_argument('--band_patches', type=int, default=1, help='CACFTNet param')
+    parser.add_argument('--mode', choices=['ViT', 'CAF'], default='CAF', help='CACFTNet param')
     args = parser.parse_args()
     return args
 
@@ -99,11 +108,8 @@ def train(model, device, train_loader, optimizer, epoch, args):
     for i, (inputs_1, labels) in enumerate(train_loader):
         inputs_1 = inputs_1.to(device)
         labels = labels.to(device)
-        if args.PCA is not None:
-            inputs_1 = inputs_1.view(-1, args.PCA, args.patch_size, args.patch_size)
-        else:
-            inputs_1 = inputs_1.view(-1, args.hsi_bands, args.patch_size, args.patch_size)
-
+                # 数据管道已保证 5D 格式 (B, 1, C, H, W)，各网络内部自行处理维度
+        pass
         optimizer.zero_grad()
         outputs = model(inputs_1)
         loss = calc_loss(outputs, labels)
@@ -129,10 +135,8 @@ def val(model, device, loader, epoch, args, mode='Verification'):
             inputs_1 = inputs_1.to(device)
             labels = labels.to(device)
 
-            if args.PCA is not None:
-                inputs_1 = inputs_1.view(-1, args.PCA, args.patch_size, args.patch_size)
-            else:
-                inputs_1 = inputs_1.view(-1, args.hsi_bands, args.patch_size, args.patch_size)
+                        # 数据管道已保证 5D 格式，直接送入模型
+            pass
             outputs = model(inputs_1)
             outputs = np.argmax(outputs.detach().cpu().numpy(), axis=1)
             if count == 0:
@@ -216,10 +220,8 @@ def main():
     train_loader, val_loader, test_loader = build_data_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if args.PCA is None:
-        model = baseNet(args.hsi_bands, args.num_class).to(device)
-    else:
-        model = baseNet(args.PCA, args.num_class).to(device)
+    from models import build_model
+    model = build_model(args.model_name, args.in_channels, args.num_class).to(device)
 
     optimizer, lr_scheduler = prepare_training(args, model)
 
