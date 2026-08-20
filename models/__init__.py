@@ -1,5 +1,10 @@
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
+# 下面是你原本的代码
+# from .baseline_net import baseNet ...
 from .baseline_net import baseNet
-from .cacft_net import CACFTNet
+from compare.cacft_net import CACFTNet
 
 _MODEL_REGISTRY = {
     'baseline': baseNet,
