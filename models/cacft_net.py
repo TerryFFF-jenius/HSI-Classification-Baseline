@@ -416,10 +416,9 @@ class ViT(nn.Module):
         self.wq = nn.Linear(image_size ** 2, image_size ** 2, bias=True)
         self.wk = nn.Linear(image_size ** 2, image_size ** 2, bias=True)
         self.wv = nn.Linear(image_size ** 2, image_size ** 2, bias=True)
-        if channels_band % 8 != 0:
-            self.Biformer = BiLevelRoutingAttention(channels_band + 1)
-        else:
-            self.Biformer = BiLevelRoutingAttention(channels_band)
+        # 彻底废除硬编码 +1。动态计算需要补齐的通道数，使其完美适配 num_heads(8)
+        self.pad_dim = (8 - (channels_band % 8)) % 8
+        self.Biformer = BiLevelRoutingAttention(channels_band + self.pad_dim)
 
     def forward(self, x, mask=None):
         x1 = x.reshape(x.shape[0], x.shape[1], self.patch_size, self.patch_size)
@@ -434,9 +433,13 @@ class ViT(nn.Module):
         covmat2 = torch.mm(centrS.T, centrS) / (ns - 1)
 
         x2 = x.reshape(x.shape[0], x.shape[1], self.patch_size, self.patch_size)
-        if x2.shape[1] % self.Biformer.num_heads != 0:
-            zero_channels = torch.zeros_like(x2[:, 0:1, :, :])
+        
+        # 安全生成对应维度的全 0 张量进行拼接，填补空白
+        if self.pad_dim > 0:
+            # 取第一通道复制 pad_dim 次，避免越界崩溃
+            zero_channels = torch.zeros_like(x2[:, 0:1, :, :]).repeat(1, self.pad_dim, 1, 1)
             x2 = torch.cat([x2, zero_channels], dim=1)
+            
         x2 = self.Biformer(x2)
         x2 = x2[:, :self.channels_band, :, :]
         x2 = x2.reshape(x2.shape[0], x2.shape[1], -1)
