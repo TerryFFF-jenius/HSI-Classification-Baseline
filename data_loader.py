@@ -179,7 +179,12 @@ def _load_dataset(args):
     elif args.dataset == 'HanChuan':
         X = sio.loadmat('./oridata/HanChuan/WHU_Hi_HanChuan.mat')['WHU_Hi_HanChuan']
         y = sio.loadmat('./oridata/HanChuan/WHU_Hi_HanChuan_gt.mat')['WHU_Hi_HanChuan_gt']
-        default_bands, default_class, default_patch, default_pca = X.shape[2], 16, 7, 15 
+        default_bands, default_class, default_patch, default_pca = X.shape[2], 16, 7, 15
+    # [新增] 洪湖数据集路由
+    elif args.dataset == 'HongHu':
+        X = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu.mat')['WHU_Hi_HongHu']
+        y = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu_gt.mat')['WHU_Hi_HongHu_gt']
+        default_bands, default_class, default_patch, default_pca = X.shape[2], 22, 7, 15
     else:
         raise ValueError(f"Unknown dataset: {args.dataset}")
 
@@ -313,6 +318,14 @@ def build_data_sim_loader(args):
         args.num_class = 16
         args.patch_size = 9
         args.PCA = 15
+    # [新增] 洪湖数据集路由 (SIM 专用)
+    elif args.dataset == 'HongHu':
+        X = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu.mat')['WHU_Hi_HongHu']
+        y = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu_gt.mat')['WHU_Hi_HongHu_gt']
+        args.hsi_bands = X.shape[2]
+        args.num_class = 22
+        args.patch_size = 9
+        args.PCA = 15
     print('Hyperspectral data shape: ', X.shape)
     print('Label shape: ', y.shape)
 
@@ -377,6 +390,13 @@ def build_data_cacf_loader(args):
         y = sio.loadmat('./oridata/HanChuan/WHU_Hi_HanChuan_gt.mat')['WHU_Hi_HanChuan_gt']
         args.hsi_bands = X.shape[2]
         args.num_class = 16
+        args.patch_size = 7
+    # [新增] 洪湖数据集路由 (CACF 专用)
+    elif args.dataset == 'HongHu':
+        X = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu.mat')['WHU_Hi_HongHu']
+        y = sio.loadmat('./oridata/HongHu/WHU_Hi_HongHu_gt.mat')['WHU_Hi_HongHu_gt']
+        args.hsi_bands = X.shape[2]
+        args.num_class = 22
         args.patch_size = 7
     print('Hyperspectral data shape: ', X.shape)
     print('Label shape: ', y.shape)

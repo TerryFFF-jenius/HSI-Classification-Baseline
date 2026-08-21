@@ -34,7 +34,7 @@ def args_parser():
     parser.add_argument('--results', type=str, default='./results/')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/')
     parser.add_argument('--project_name', type=str, default=project_name)
-    parser.add_argument('--dataset', type=str, default='PaviaU', choices=['PaviaU', 'Houston', 'IP', 'LongKou', 'HanChuan'], help='Dataset name')
+    parser.add_argument('--dataset', type=str, default='PaviaU', choices=['PaviaU', 'Houston', 'IP', 'LongKou', 'HanChuan', 'HongHu'], help='Dataset name')
 
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--train_ratio', type=float, default=0.01)
