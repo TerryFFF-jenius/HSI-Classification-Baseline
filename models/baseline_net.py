@@ -95,10 +95,12 @@ class baseNet(nn.Module):
         self.bneck_3 = Unit(7)
         self.at3 = Attention(7, 160, in_channels)
 
+        # 动态推导经过第一层 3D 卷积后的真实深度，彻底击碎奇偶数硬编码
+        actual_depth = (in_channels - 1) // 2 + 1 
         self.conv3d_2 = nn.Sequential(
             nn.BatchNorm3d(160),
             nn.ReLU(inplace=True),
-            nn.Conv3d(160, 256, kernel_size=(in_channels//2, 1, 1), stride=1,)
+            nn.Conv3d(160, 256, kernel_size=(actual_depth, 1, 1), stride=1)
         )
         self.conv3d_3 = nn.Sequential(
             nn.BatchNorm3d(1),
