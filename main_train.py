@@ -232,9 +232,13 @@ def main():
             acc = val(model, device, val_loader, epoch, args)
             if acc >= best_acc:
                 best_acc = acc
-                print("save model")
+                print(f"save model at epoch {epoch}")
                 checkpointsmodelfile = os.path.join(args.ckpt_dir, 'model_%.2f.pth' % best_acc)
                 torch.save(model.state_dict(), checkpointsmodelfile)
+                
+                # [新增] 将最优 epoch 物理持久化，防宕机丢失
+                with open(os.path.join(args.ckpt_dir, 'best_epoch.txt'), 'w') as f:
+                    f.write(f"best_epoch: {epoch}\nbest_oa: {best_acc}\n")
 
 
 if __name__ == '__main__':

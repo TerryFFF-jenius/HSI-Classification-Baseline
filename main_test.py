@@ -1,5 +1,8 @@
 import math
 import os
+import glob
+import json
+import argparse
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import torch
 import torch.optim
@@ -11,7 +14,6 @@ import pandas as pd
 from tabulate import tabulate
 import torch.backends.cudnn as cudnn
 import torch.backends.cuda
-import argparse
 
 torch.backends.cudnn.allow_tf32 = True
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -43,7 +45,6 @@ def args_parser():
     parser.add_argument('--is_outimg', type=str2bool, default=False)
     parser.add_argument('--modelfile', type=str, default='./checkpoints/own/PaviaU/model_17.52.pth')
     parser.add_argument('--seed', type=int, default=300)
-    
     
     # 彻底解除硬编码，交由 DataLoader 动态注入
     parser.add_argument('--num_class', type=int, default=None)
@@ -77,9 +78,7 @@ def test(model, device, test_loader, args):
             inputs_1 = inputs_1.float().to(device)
             labels = labels.long().to(device)
 
-                        # 数据管道已保证 5D 格式 (B, 1, C, H, W)，直接送入模型
-            pass
-            
+            # 数据管道已保证 5D 格式 (B, 1, C, H, W)，直接送入模型
             outputs = model(inputs_1)
             outputs = np.argmax(outputs.detach().cpu().numpy(), axis=1)
             
@@ -142,6 +141,21 @@ def test(model, device, test_loader, args):
         appender.write(' [The test OA is: %.2f]' % (oa) + ' [The test AA is: %.2f]' % (aa) +
                        ' [The test Kappa is: %.2f]' % (kappa_percentage) + '\n')
         appender.write('\n')
+
+    ckpt_dir = os.path.join(args.checkpoints, args.project_name, args.dataset, f"exp_{args.exp_id}")
+    os.makedirs(ckpt_dir, exist_ok=True)
+    result_dict = {
+        "dataset": args.dataset,
+        "model": args.model_name,
+        "exp_id": args.exp_id,
+        "oa": float(oa),
+        "aa": float(aa),
+        "kappa": float(kappa_percentage),
+        "class_acc": {f"Class_{i+1}": float(acc) for i, acc in enumerate(class_accuracy)}
+    }
+    with open(os.path.join(ckpt_dir, 'test_result.json'), 'w') as f:
+        json.dump(result_dict, f, indent=2)
+    print("Metrics successfully dumped to JSON.")
     return oa
 
 
@@ -164,7 +178,20 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
     model = build_model(args.model_name, args.in_channels, args.num_class, args.patch_size).to(device)
-
+    
+    # 自动寻址：去实验目录下捞取精度最高的 .pth
+    if not getattr(args, 'modelfile', None) or not os.path.exists(args.modelfile):
+        ckpt_dir = os.path.join(args.checkpoints, args.project_name, args.dataset, f"exp_{args.exp_id}")
+        pth_files = glob.glob(os.path.join(ckpt_dir, 'model_*.pth'))
+        if pth_files:
+            # 解析文件名中的 OA 值进行绝对降序排列，防误抓
+            pth_files.sort(key=lambda x: float(os.path.basename(x).replace('model_', '').replace('.pth', '')), reverse=True)
+            args.modelfile = pth_files[0]  # [关键修正] 必须赋值给 modelfile
+            print(f"[Auto-resolve] 成功加载最高精度权重: {args.modelfile}")
+        else:
+            raise FileNotFoundError(f"未找到权重文件: {ckpt_dir}")
+            
+    # [架构修复] 这两行必须退格到和 if 判断平齐，确保任何情况下都能被执行
     model.load_state_dict(torch.load(args.modelfile, weights_only=True))
     test(model, device, test_loader, args)
 

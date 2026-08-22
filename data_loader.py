@@ -433,4 +433,8 @@ def build_test_loader(args):
     tmp_args = copy.copy(args)
     tmp_args.is_train = True
     _, _, test_loader = build_data_loader(tmp_args)
-    return test_loader    
+    # [修复] 将 data_loader 注入的动态参数同步回原始 args
+    for attr in ['hsi_bands', 'num_class', 'patch_size', 'PCA', 'in_channels']:
+        if hasattr(tmp_args, attr):
+            setattr(args, attr, getattr(tmp_args, attr))
+    return test_loader
