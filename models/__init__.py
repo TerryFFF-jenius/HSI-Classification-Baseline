@@ -7,7 +7,8 @@ from compare.cacft_net import CACFTNet
 from compare.lite_hcnet import LiteHCNetWrapper
 from compare.lssan import LSSAN
 from compare.msdan import MSDAN
-from compare.simpoolformer import SimPoolFormer  # [新增] 导入 SimPoolFormer
+from compare.simpoolformer import SimPoolFormer
+from compare.gscvit import GSCViTWrapper  # [新增]
 
 class Wrapper5Dto4D(nn.Module):
     """通用降维拦截器：将主干传入的 5D 张量剥离为 4D 供对比网络使用"""
@@ -25,7 +26,8 @@ _MODEL_REGISTRY = {
     'lite_hcnet': LiteHCNetWrapper,
     'lssan': LSSAN,
     'msdan': MSDAN,
-    'simpoolformer': SimPoolFormer,  # [新增] 挂载模型
+    'simpoolformer': SimPoolFormer,
+    'gscvit': GSCViTWrapper,  # [新增]
 }
 
 def build_model(model_name, in_channels, num_classes, patch_size=7):
@@ -45,7 +47,8 @@ def build_model(model_name, in_channels, num_classes, patch_size=7):
     elif model_name == 'msdan':
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'simpoolformer':
-        # [新增] SimPoolFormer 吸收 4D，注入尺寸参数后被拦截器包裹
         return Wrapper5Dto4D(model_cls(in_channels, num_classes, patch_size))
+    elif model_name == 'gscvit':
+        return model_cls(in_channels, num_classes, patch_size)
     else:
         return model_cls(in_channels, num_classes, patch_size)
