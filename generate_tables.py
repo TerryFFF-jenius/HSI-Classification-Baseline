@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 def generate_table(dataset):
-    methods = ["baseline", "cacft", "lite_hcnet", "lssan", "msdan", "simpoolformer", "gscvit", "spectralformer"]
+    methods = ["baseline", "cacft", "lite_hcnet", "lssan", "msdan", "simpoolformer", "gscvit", "spectralformer", "ssftt"]
     rows = []
     
     for method in methods:

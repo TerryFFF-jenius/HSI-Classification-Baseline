@@ -2,7 +2,7 @@
 
 # 本地显卡保护策略：一次只放开一个数据集。跑完 LongKou 后，再改成 HanChuan 继续跑
 DATASETS=("HongHu") 
-METHODS=("baseline" "cacft" "lite_hcnet" "lssan" "msdan" "simpoolformer" "gscvit" "spectralformer")
+METHODS=("baseline" "cacft" "lite_hcnet" "lssan" "msdan" "simpoolformer" "gscvit" "spectralformer" "ssftt")
 
 EPOCHS=200
 SEED=300

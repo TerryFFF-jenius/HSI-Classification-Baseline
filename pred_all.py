@@ -51,7 +51,7 @@ def args_parser():
     
     # === 新增：注册模型路由参数 ===
     parser.add_argument('--model_name', type=str, default='baseline', 
-                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'spectralformer'], 
+                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'spectralformer', 'ssftt'], 
                         help='Model routing')
     parser.add_argument('--band_patches', type=int, default=1, help='CACFTNet param')
     parser.add_argument('--mode', choices=['ViT', 'CAF'], default='CAF', help='CACFTNet param')

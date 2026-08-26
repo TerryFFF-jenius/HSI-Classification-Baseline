@@ -10,7 +10,7 @@ from compare.msdan import MSDAN
 from compare.simpoolformer import SimPoolFormer
 from compare.gscvit import GSCViTWrapper  # [新增]
 from compare.spectralformer import SpectralFormerWrapper  # [新增]
-
+from compare.ssftt import SSFTTWrapper  # [新增]
 
 class Wrapper5Dto4D(nn.Module):
     """通用降维拦截器：将主干传入的 5D 张量剥离为 4D 供对比网络使用"""
@@ -31,6 +31,7 @@ _MODEL_REGISTRY = {
     'simpoolformer': SimPoolFormer,
     'gscvit': GSCViTWrapper,  # [新增]
     'spectralformer': SpectralFormerWrapper,  # [新增]
+    'ssftt': SSFTTWrapper,  # [新增]
 }
 
 def build_model(model_name, in_channels, num_classes, patch_size=7):
@@ -54,6 +55,8 @@ def build_model(model_name, in_channels, num_classes, patch_size=7):
     elif model_name == 'gscvit':
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'spectralformer':      # [新增]
+        return model_cls(in_channels, num_classes, patch_size)
+    elif model_name == 'ssftt':               # [新增]
         return model_cls(in_channels, num_classes, patch_size)
     else:
         return model_cls(in_channels, num_classes, patch_size)
