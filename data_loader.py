@@ -39,9 +39,9 @@ def trans_tif(image, output_path):
         dataset.GetRasterBand(1).WriteArray(image)
 
 
-def applyPCA(X, numComponents):
+def applyPCA(X, numComponents, random_state=0):
     newX = np.reshape(X, (-1, X.shape[2]))
-    pca = PCA(n_components=numComponents, whiten=True)
+    pca = PCA(n_components=numComponents, whiten=True, random_state=random_state)
     newX = pca.fit_transform(newX)
     newX = np.reshape(newX, (X.shape[0], X.shape[1], numComponents))
     return newX
@@ -207,7 +207,7 @@ def _build_loaders_from_cubes(X_cube, y_cube, args):
 
     print('\n... ... create train & val & test data ... ...')
     Xtrain, Xval, Xtest, ytrain, yval, ytest = split_data(
-        X_cube, y_cube, args.train_ratio, val_ratio, splitdset="sklearn")
+        X_cube, y_cube, args.train_ratio, val_ratio, splitdset="sklearn", rand_state=args.seed)
     print('Xtrain shape: ', Xtrain.shape)
     if len(Xval) > 0:
         print('Xval shape:   ', Xval.shape)
@@ -254,7 +254,7 @@ def build_data_loader(args):
     if args.is_train:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X_pca, y = createImageCubes(X_pca, y, windowSize=args.patch_size)
@@ -270,7 +270,7 @@ def build_data_loader(args):
     else:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X = padWithZeros(X_pca, args.patch_size // 2)
@@ -332,7 +332,7 @@ def build_data_sim_loader(args):
     if args.is_train:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X_pca, y = createImageCubes(X_pca, y, windowSize=args.patch_size)
@@ -348,7 +348,7 @@ def build_data_sim_loader(args):
     else:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X = padWithZeros(X_pca, args.patch_size // 2)
@@ -404,7 +404,7 @@ def build_data_cacf_loader(args):
     if args.is_train:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X_pca, y = createImageCubes(X_pca, y, windowSize=args.patch_size)
@@ -420,7 +420,7 @@ def build_data_cacf_loader(args):
     else:
         if args.PCA is not None:
             print('\n... ... PCA tranformation ... ...')
-            X_pca = applyPCA(X, numComponents=args.PCA)
+            X_pca = applyPCA(X, numComponents=args.PCA, random_state=getattr(args, 'seed', 0))
             print('Data shape after PCA: ', X_pca.shape)
             print('\n... ... create data cubes ... ...')
             X = padWithZeros(X_pca, args.patch_size // 2)

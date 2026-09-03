@@ -56,6 +56,7 @@ def args_parser():
                         choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'spectralformer', 'ssftt'], 
                         help='Model routing')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
+    parser.add_argument('--seed', type=int, default=300, help='random seed for reproducibility')
     args = parser.parse_args()
     return args
 
@@ -175,6 +176,16 @@ def main():
     # 核心管线劫持：强行写入 True 开启训练集的构建逻辑
     # 彻底阻断 data_loader 抛出残缺的一维矩阵
     # ==========================================
+    import random
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(args.seed)
+        torch.cuda.manual_seed_all(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     test_loader = build_test_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

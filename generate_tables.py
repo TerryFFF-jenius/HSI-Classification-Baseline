@@ -2,16 +2,16 @@ import os
 import json
 import glob
 import pandas as pd
+import numpy as np
 
-def generate_transposed_tables():
+def generate_statistical_tables():
     checkpoints_dir = './checkpoints/own/'
-    # 强制规定列顺序：Baseline 第一，其余方法随后
     methods = [
-        "baseline", "cacft", "lite_hcnet", "lssan", "msdan", 
+        "cacft", "lite_hcnet", "lssan", "msdan",
         "simpoolformer", "gscvit", "spectralformer", "ssftt"
     ]
-    # 当前处理的三个数据集
     datasets = ["LongKou", "HanChuan", "HongHu"]
+    seeds = [100, 200, 300, 400, 500]
 
     for dataset in datasets:
         dataset_dir = os.path.join(checkpoints_dir, dataset)
@@ -19,55 +19,63 @@ def generate_transposed_tables():
             print(f"[!] 目录不存在，跳过: {dataset_dir}")
             continue
 
-        results = []
-        
-        # [修复1] 限定遍历 exp_* 目录，避免递归污染
-        exp_dirs = glob.glob(os.path.join(dataset_dir, 'exp_*'))
-        for exp_dir in exp_dirs:
-            json_path = os.path.join(exp_dir, 'test_result.json')
-            if not os.path.exists(json_path):
-                continue
-                
-            try:
-                with open(json_path, 'r') as f:
-                    data = json.load(f)
-                
-                model_name = data.get('model')
-                if model_name not in methods:
-                    print(f"[!] 未知方法 '{model_name}' 于 {exp_dir}，跳过")
+        results = {m: {} for m in methods}
+
+        for method in methods:
+            oa_list, aa_list, kappa_list = [], [], []
+            class_acc_lists = {}
+
+            for seed in seeds:
+                exp_id = f"{dataset}_{method}_ep200_seed{seed}"
+                exp_dir = os.path.join(dataset_dir, f"exp_{exp_id}")
+                json_path = os.path.join(exp_dir, "test_result.json")
+
+                if not os.path.exists(json_path):
+                    print(f"[!] 缺失: {json_path}")
                     continue
 
-                row = {'Method': model_name}
-                
-                # [修复2] 显式排序类别键名，确保行顺序一致
-                class_acc = data.get('class_acc', {})
-                for cls_name in sorted(class_acc.keys(), key=lambda x: int(x.split('_')[-1])):
-                    row[cls_name] = class_acc[cls_name]
-                    
-                row['OA'] = data.get('oa')
-                row['AA'] = data.get('aa')
-                row['Kappa'] = data.get('kappa')
-                
-                results.append(row)
-            except Exception as e:
-                print(f"[!] 读取文件出错 {json_path}: {e}")
+                with open(json_path, 'r') as f:
+                    data = json.load(f)
 
-        if not results:
-            print(f"[!] 未找到 {dataset} 的有效测试结果，跳过。")
-            continue
+                oa_list.append(data.get('oa', 0.0))
+                aa_list.append(data.get('aa', 0.0))
+                kappa_list.append(data.get('kappa', 0.0))
 
-        df = pd.DataFrame(results)
-        df['Method'] = pd.Categorical(df['Method'], categories=methods, ordered=True)
-        df = df.sort_values('Method')
-        df.set_index('Method', inplace=True)
-        df_transposed = df.T
-        df_transposed.reset_index(inplace=True)
-        df_transposed.rename(columns={'index': 'Metrics'}, inplace=True)
-        
-        # [修复3] 追加时间戳，保留历史版本
-        output_file = f"{dataset}_Comparison_Table.csv"
-        df_transposed.to_csv(output_file, index=False)
-        print(f"[OK] 已生成转置表格: {output_file}")
+                for cls_name, acc in data.get('class_acc', {}).items():
+                    class_acc_lists.setdefault(cls_name, []).append(acc)
+
+            if not oa_list:
+                print(f"[!] {dataset}/{method} 无有效数据，跳过")
+                continue
+
+            results[method]['OA'] = f"{np.mean(oa_list):.2f}±{np.std(oa_list, ddof=1):.2f}"
+            results[method]['AA'] = f"{np.mean(aa_list):.2f}±{np.std(aa_list, ddof=1):.2f}"
+            results[method]['Kappa'] = f"{np.mean(kappa_list):.2f}±{np.std(kappa_list, ddof=1):.2f}"
+
+            for cls_name in sorted(class_acc_lists.keys(), key=lambda x: int(x.split('_')[-1])):
+                accs = class_acc_lists[cls_name]
+                results[method][cls_name] = f"{np.mean(accs):.2f}±{np.std(accs, ddof=1):.2f}"
+
+        all_metrics = set()
+        for m in methods:
+            all_metrics.update(results[m].keys())
+
+        class_metrics = sorted([m for m in all_metrics if m.startswith('Class_')],
+                               key=lambda x: int(x.split('_')[-1]))
+        final_metrics = class_metrics + ['OA', 'AA', 'Kappa']
+
+        rows = []
+        for metric in final_metrics:
+            row = {'Metrics': metric}
+            for method in methods:
+                row[method] = results[method].get(metric, 'N/A')
+            rows.append(row)
+
+        if rows:
+            df = pd.DataFrame(rows)
+            output_file = f"{dataset}_Comparison_Table.csv"
+            df.to_csv(output_file, index=False, encoding='utf-8-sig')
+            print(f"[OK] 已生成统计表格: {output_file}")
 
 if __name__ == '__main__':
-    generate_transposed_tables()
+    generate_statistical_tables()

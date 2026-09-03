@@ -218,6 +218,16 @@ def main():
     args.log_file = os.path.join(model_dir_path, 'log.txt')
     args.ckpt_dir = ckpt_dir
 
+    import random
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(args.seed)
+        torch.cuda.manual_seed_all(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     train_loader, val_loader, test_loader = build_data_loader(args)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
