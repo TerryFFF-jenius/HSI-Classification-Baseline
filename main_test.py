@@ -44,7 +44,7 @@ def args_parser():
     parser.add_argument('--is_train', type=str2bool, default=False)
     parser.add_argument('--is_outimg', type=str2bool, default=False)
     parser.add_argument('--modelfile', type=str, default='./checkpoints/own/PaviaU/model_17.52.pth')
-    parser.add_argument('--seed', type=int, default=300)
+    parser.add_argument('--seed', type=int, default=300, help='random seed')
     
     # 彻底解除硬编码，交由 DataLoader 动态注入
     parser.add_argument('--num_class', type=int, default=None)
@@ -55,8 +55,7 @@ def args_parser():
     parser.add_argument('--model_name', type=str, default='baseline', 
                         choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'spectralformer', 'ssftt'], 
                         help='Model routing')
-    parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation')
-    parser.add_argument('--seed', type=int, default=300, help='random seed for reproducibility')
+    parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation') 
     args = parser.parse_args()
     return args
 
