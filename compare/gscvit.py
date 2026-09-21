@@ -177,21 +177,103 @@ class GSCViT(nn.Module):
             nn.Linear(dims[-1], num_classes)
         )
 
-    def forward(self, x):
-        # 原生 5D 兼容: (B, 1, C, H, W) → (B, C, H, W)
+        # The final feature-map channel dimension is also the input dimension
+        # expected by a future feature adapter (for example, TSSR/DSSR).
+        self.feature_dim = dims[-1]
+
+    @staticmethod
+    def _ensure_4d(x):
+        """Normalize accepted inputs to (B, C, H, W).
+
+        The training pipeline supplies (B, 1, C, H, W), while the original
+        GSC-ViT implementation operates on 4-D tensors.  Keeping this
+        normalization in one place lets the feature interface and the normal
+        classifier path use exactly the same backbone computation.
+        """
         if x.dim() == 5:
+            if x.shape[1] != 1:
+                raise ValueError(
+                    "GSCViT expects a 5-D input with a singleton dimension "
+                    f"at index 1, got shape {tuple(x.shape)}"
+                )
             x = x.squeeze(1)
+        if x.dim() != 4:
+            raise ValueError(
+                "GSCViT expects input shape (B, C, H, W) or (B, 1, C, H, W), "
+                f"got shape {tuple(x.shape)}"
+            )
+        return x
+
+    def forward_features(self, x, pre_gssa_adapter=None, return_pre_gssa=False):
+        """Return backbone features and optionally expose the final GSC output.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor with shape ``(B, C, H, W)`` or ``(B, 1, C, H, W)``.
+        pre_gssa_adapter : callable, optional
+            A future feature adapter that receives the output of the final GSC
+            block immediately before the final GSSA/Transformer block.  It
+            must return a tensor with the same shape.  ``None`` keeps the
+            original GSC-ViT path unchanged.
+        return_pre_gssa : bool, default=False
+            If ``True``, return ``(final_features, pre_gssa_features)``.  The
+            second tensor is the unmodified output of the final GSC block and
+            is the intended input for a routing module.
+
+        Returns
+        -------
+        torch.Tensor or tuple[torch.Tensor, torch.Tensor]
+            ``final_features`` has already passed through the original GSSA
+            blocks and has shape ``(B, 64, H, W)`` for the current wrapper
+            configuration.  ``pre_gssa_features`` is the feature map between
+            the final GSC and final GSSA blocks.
+        """
+        x = self._ensure_4d(x)
+        # 原生 5D 兼容: (B, 1, C, H, W) → (B, C, H, W)
         x = self.sc(x)
         x = self.bn_1(x)
         x = self.relu_1(x)
-        for peg, transformer, bn, relu, pw in self.layers_trans:
+        last_stage_index = len(self.layers_trans) - 1
+        pre_gssa_features = None
+
+        for stage_index, (peg, transformer, bn, relu, pw) in enumerate(self.layers_trans):
             x = peg(x)
+
+            # The final GSC output is the stable insertion point for the
+            # planned dynamic routing modules.  Capture it before the final
+            # Transformer/GSSA, while leaving all earlier stages untouched.
+            if stage_index == last_stage_index:
+                pre_gssa_features = x
+                if pre_gssa_adapter is not None:
+                    x = pre_gssa_adapter(x)
+                    if not torch.is_tensor(x):
+                        raise TypeError(
+                            "pre_gssa_adapter must return a torch.Tensor"
+                        )
+                    if x.shape != pre_gssa_features.shape:
+                        raise ValueError(
+                            "pre_gssa_adapter must preserve the feature shape; "
+                            f"expected {tuple(pre_gssa_features.shape)}, "
+                            f"got {tuple(x.shape)}"
+                        )
+
             y = x
             x = transformer(x)
             x = pw(x) + y
             x = bn(x)
             x = relu(x)
-        return self.mlp_head(x)
+
+        if pre_gssa_features is None:
+            raise RuntimeError("GSCViT has no GSC stages to expose")
+
+        if return_pre_gssa:
+            return x, pre_gssa_features
+        return x
+
+    def forward(self, x):
+        """Run the unchanged classification path and return logits only."""
+        return self.mlp_head(self.forward_features(x))
 
 
 # ==================== 统一接口包装类（新增）====================
@@ -215,10 +297,11 @@ class GSCViTWrapper(nn.Module):
             self.target_size = patch_size
             self.resize = nn.Identity()
         
-        # 计算 stages: target_size 经过 3 层 GSC 后保持 spatial 不变（stride=1, padding=1）
+        # The configured dims=(256, 128, 64) create two actual GSC stages;
+        # each keeps the spatial size unchanged (stride=1, padding=1).
         # 但 SpectralCalibration 不改变 spatial
-        # 因此 group_spatial_size 各 stage 均为 3
-        num_stages = 3  # 与 dims 长度匹配
+        # 因此 group_spatial_size 对实际使用的 stages 均为 3。
+        num_stages = 3
         group_spatial_size = [3] * num_stages
         
         self.net = GSCViT(
@@ -240,3 +323,29 @@ class GSCViTWrapper(nn.Module):
         # 若需要，调整空间尺寸为 3 的倍数
         x = self.resize(x)
         return self.net(x)
+
+    def forward_features(self, x, pre_gssa_adapter=None, return_pre_gssa=False):
+        """Expose GSC-ViT feature maps without changing ``forward`` logits.
+
+        The wrapper applies the same 5-D input handling and 7-to-9 spatial
+        adaptation as the normal baseline path before delegating to
+        :meth:`GSCViT.forward_features`.
+        """
+        if x.dim() == 5:
+            if x.shape[1] != 1:
+                raise ValueError(
+                    "GSCViTWrapper expects a singleton dimension at index 1, "
+                    f"got shape {tuple(x.shape)}"
+                )
+            x = x.squeeze(1)
+        if x.dim() != 4:
+            raise ValueError(
+                "GSCViTWrapper expects input shape (B, C, H, W) or "
+                f"(B, 1, C, H, W), got shape {tuple(x.shape)}"
+            )
+        x = self.resize(x)
+        return self.net.forward_features(
+            x,
+            pre_gssa_adapter=pre_gssa_adapter,
+            return_pre_gssa=return_pre_gssa,
+        )
