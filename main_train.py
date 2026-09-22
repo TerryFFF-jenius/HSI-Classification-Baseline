@@ -86,6 +86,12 @@ def args_parser():
                         help='Model routing')
     parser.add_argument('--band_patches', type=int, default=1, help='CACFTNet param')
     parser.add_argument('--mode', choices=['ViT', 'CAF'], default='CAF', help='CACFTNet param')
+    parser.add_argument('--spectral_groups', type=int, default=8,
+                        help='TSSR latent spectral groups')
+    parser.add_argument('--route_strength', type=float, default=0.5,
+                        help='TSSR residual routing strength')
+    parser.add_argument('--route_temperature', type=float, default=1.0,
+                        help='TSSR softmax temperature')
     args = parser.parse_args()
     return args
 
@@ -232,7 +238,9 @@ def main():
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
-    model = build_model(args.model_name, args.in_channels, args.num_class, args.patch_size).to(device)
+    model = build_model(args.model_name, args.in_channels, args.num_class,
+                        args.patch_size, args.spectral_groups,
+                        args.route_strength, args.route_temperature).to(device)
 
     optimizer, lr_scheduler = prepare_training(args, model)
 

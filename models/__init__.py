@@ -35,7 +35,9 @@ _MODEL_REGISTRY = {
     'ssftt': SSFTTWrapper,  # [新增]
 }
 
-def build_model(model_name, in_channels, num_classes, patch_size=7):
+def build_model(model_name, in_channels, num_classes, patch_size=7,
+                spectral_groups=8, route_strength=0.5,
+                route_temperature=1.0):
     if model_name not in _MODEL_REGISTRY:
         raise ValueError(f"Unknown model '{model_name}'")
         
@@ -56,7 +58,10 @@ def build_model(model_name, in_channels, num_classes, patch_size=7):
     elif model_name == 'gscvit':
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'gscvit_tssr':
-        return model_cls(in_channels, num_classes, patch_size)
+        return model_cls(in_channels, num_classes, patch_size,
+                         spectral_groups=spectral_groups,
+                         route_strength=route_strength,
+                         route_temperature=route_temperature)
     elif model_name == 'spectralformer':      # [新增]
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'ssftt':               # [新增]

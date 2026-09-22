@@ -55,6 +55,12 @@ def args_parser():
     parser.add_argument('--model_name', type=str, default='baseline', 
                         choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'spectralformer', 'ssftt'],
                         help='Model routing')
+    parser.add_argument('--spectral_groups', type=int, default=8,
+                        help='TSSR latent spectral groups')
+    parser.add_argument('--route_strength', type=float, default=0.5,
+                        help='TSSR residual routing strength')
+    parser.add_argument('--route_temperature', type=float, default=1.0,
+                        help='TSSR softmax temperature')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation') 
     args = parser.parse_args()
     return args
@@ -189,7 +195,9 @@ def main():
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
-    model = build_model(args.model_name, args.in_channels, args.num_class, args.patch_size).to(device)
+    model = build_model(args.model_name, args.in_channels, args.num_class,
+                        args.patch_size, args.spectral_groups,
+                        args.route_strength, args.route_temperature).to(device)
     
     # 自动寻址：去实验目录下捞取精度最高的 .pth
     if not getattr(args, 'modelfile', None) or not os.path.exists(args.modelfile):
