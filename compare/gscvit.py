@@ -349,3 +349,44 @@ class GSCViTWrapper(nn.Module):
             pre_gssa_adapter=pre_gssa_adapter,
             return_pre_gssa=return_pre_gssa,
         )
+
+
+class GSCViTTSSRWrapper(GSCViTWrapper):
+    """GSC-ViT with the first innovation: TSSR soft routing.
+
+    The original ``GSCViTWrapper`` remains unchanged for the baseline.  This
+    subclass inserts a ``SpectralSpatialRouter`` only after the final GSC and
+    immediately before the final GSSA, while preserving the feature shape.
+    """
+
+    def __init__(
+        self,
+        in_channels,
+        num_classes,
+        patch_size,
+        spectral_groups=8,
+        route_strength=0.5,
+        route_temperature=1.0,
+    ):
+        super().__init__(in_channels, num_classes, patch_size)
+        from compare.dynamic_router import SpectralSpatialRouter
+
+        self.dynamic_router = SpectralSpatialRouter(
+            channels=self.net.feature_dim,
+            num_groups=spectral_groups,
+            route_strength=route_strength,
+            temperature=route_temperature,
+        )
+
+    def forward(self, x):
+        features = self.forward_features(
+            x,
+            pre_gssa_adapter=self.dynamic_router,
+            return_pre_gssa=False,
+        )
+        return self.net.mlp_head(features)
+
+    def forward_with_routing(self, x):
+        """Return logits plus detached relevance maps for analysis."""
+        logits = self.forward(x)
+        return logits, self.dynamic_router.last_alpha, self.dynamic_router.last_beta
