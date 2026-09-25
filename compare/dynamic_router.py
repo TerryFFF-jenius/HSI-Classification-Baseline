@@ -114,6 +114,10 @@ class SpectralSpatialRouter(nn.Module):
         Residual routing strength.  Zero is equivalent to an identity route.
     temperature : float, default=1.0
         Softmax temperature for spectral relevance estimation.
+    router_variant : {"full", "no_spectral", "no_spatial"}, default="full"
+        Ablation mode. ``no_spectral`` replaces the learned spectral scores
+        with a uniform distribution, while ``no_spatial`` replaces the
+        learned spatial scores with the neutral gain one.
     """
 
     def __init__(
@@ -122,14 +126,22 @@ class SpectralSpatialRouter(nn.Module):
         num_groups=8,
         route_strength=0.5,
         temperature=1.0,
+        router_variant="full",
     ):
         super().__init__()
         if route_strength < 0 or route_strength > 1:
             raise ValueError("route_strength must be in [0, 1]")
+        valid_variants = {"full", "no_spectral", "no_spatial"}
+        if router_variant not in valid_variants:
+            raise ValueError(
+                "router_variant must be one of "
+                f"{sorted(valid_variants)}, got {router_variant!r}"
+            )
 
         self.channels = channels
         self.num_groups = num_groups
         self.route_strength = float(route_strength)
+        self.router_variant = router_variant
         self.spectral_estimator = SpectralRelevanceEstimator(
             channels=channels,
             num_groups=num_groups,
@@ -155,8 +167,28 @@ class SpectralSpatialRouter(nn.Module):
                 f"expected {self.channels}, got {x.shape[1]}"
             )
 
-        alpha = self.spectral_estimator(x)
-        beta = self.spatial_estimator(x)
+        if self.router_variant == "no_spectral":
+            # Keep the same alpha shape and probability semantics while
+            # removing the learned spectral branch from this ablation.
+            alpha = torch.full(
+                (x.shape[0], self.num_groups),
+                1.0 / self.num_groups,
+                dtype=x.dtype,
+                device=x.device,
+            )
+        else:
+            alpha = self.spectral_estimator(x)
+
+        if self.router_variant == "no_spatial":
+            # beta=1 is the neutral spatial gain.  The spatial estimator is
+            # therefore absent from this ablation's forward computation.
+            beta = torch.ones(
+                (x.shape[0], 1, x.shape[-2], x.shape[-1]),
+                dtype=x.dtype,
+                device=x.device,
+            )
+        else:
+            beta = self.spatial_estimator(x)
 
         # alpha is a probability distribution over groups.  Multiplying by G
         # turns it into a gain whose neutral value is approximately one.  The
@@ -179,4 +211,3 @@ class SpectralSpatialRouter(nn.Module):
     def forward(self, x):
         routed, _, _ = self.route(x)
         return routed
-

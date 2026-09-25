@@ -61,6 +61,9 @@ def args_parser():
                         help='TSSR residual routing strength')
     parser.add_argument('--route_temperature', type=float, default=1.0,
                         help='TSSR softmax temperature')
+    parser.add_argument('--router_variant', type=str, default='full',
+                        choices=['full', 'no_spectral', 'no_spatial'],
+                        help='TSSR ablation variant')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation') 
     args = parser.parse_args()
     return args
@@ -156,6 +159,11 @@ def test(model, device, test_loader, args):
         "dataset": args.dataset,
         "model": args.model_name,
         "exp_id": args.exp_id,
+        "seed": args.seed,
+        "router_variant": args.router_variant,
+        "spectral_groups": args.spectral_groups,
+        "route_strength": args.route_strength,
+        "route_temperature": args.route_temperature,
         "oa": float(oa),
         "aa": float(aa),
         "kappa": float(kappa_percentage),
@@ -193,11 +201,16 @@ def main():
 
     test_loader = build_test_loader(args)
 
+    # Persist the exact test-time configuration alongside test_result.json.
+    with open(os.path.join(model_dir_path, 'test_config.json'), 'w', encoding='utf-8') as f:
+        json.dump(vars(args), f, indent=2, ensure_ascii=False, default=str)
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
     model = build_model(args.model_name, args.in_channels, args.num_class,
                         args.patch_size, args.spectral_groups,
-                        args.route_strength, args.route_temperature).to(device)
+                        args.route_strength, args.route_temperature,
+                        args.router_variant).to(device)
     
     # 自动寻址：去实验目录下捞取精度最高的 .pth
     if not getattr(args, 'modelfile', None) or not os.path.exists(args.modelfile):

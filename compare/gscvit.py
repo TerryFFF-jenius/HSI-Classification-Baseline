@@ -357,6 +357,8 @@ class GSCViTTSSRWrapper(GSCViTWrapper):
     The original ``GSCViTWrapper`` remains unchanged for the baseline.  This
     subclass inserts a ``SpectralSpatialRouter`` only after the final GSC and
     immediately before the final GSSA, while preserving the feature shape.
+    ``router_variant`` selects the full route or one of the two controlled
+    component ablations.
     """
 
     def __init__(
@@ -367,6 +369,7 @@ class GSCViTTSSRWrapper(GSCViTWrapper):
         spectral_groups=8,
         route_strength=0.5,
         route_temperature=1.0,
+        router_variant="full",
     ):
         super().__init__(in_channels, num_classes, patch_size)
         from compare.dynamic_router import SpectralSpatialRouter
@@ -376,6 +379,7 @@ class GSCViTTSSRWrapper(GSCViTWrapper):
             num_groups=spectral_groups,
             route_strength=route_strength,
             temperature=route_temperature,
+            router_variant=router_variant,
         )
 
     def forward(self, x):

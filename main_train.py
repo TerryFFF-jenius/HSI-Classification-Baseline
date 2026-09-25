@@ -1,5 +1,6 @@
 import math
 import os
+import json
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import torch
 import torch.optim
@@ -92,6 +93,9 @@ def args_parser():
                         help='TSSR residual routing strength')
     parser.add_argument('--route_temperature', type=float, default=1.0,
                         help='TSSR softmax temperature')
+    parser.add_argument('--router_variant', type=str, default='full',
+                        choices=['full', 'no_spectral', 'no_spatial'],
+                        help='TSSR ablation variant')
     args = parser.parse_args()
     return args
 
@@ -236,11 +240,28 @@ def main():
 
     train_loader, val_loader, test_loader = build_data_loader(args)
 
+    # Persist the resolved run configuration, including the seed and router
+    # variant, next to the log and checkpoints for reproducibility.
+    with open(os.path.join(model_dir_path, 'train_config.json'), 'w', encoding='utf-8') as f:
+        json.dump(vars(args), f, indent=2, ensure_ascii=False, default=str)
+    with open(args.log_file, 'a', encoding='utf-8') as appender:
+        appender.write('\n[RunConfig] ' + json.dumps({
+            'dataset': args.dataset,
+            'model_name': args.model_name,
+            'seed': args.seed,
+            'epochs': args.epochs,
+            'spectral_groups': args.spectral_groups,
+            'route_strength': args.route_strength,
+            'route_temperature': args.route_temperature,
+            'router_variant': args.router_variant,
+        }, ensure_ascii=False) + '\n')
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     from models import build_model
     model = build_model(args.model_name, args.in_channels, args.num_class,
                         args.patch_size, args.spectral_groups,
-                        args.route_strength, args.route_temperature).to(device)
+                        args.route_strength, args.route_temperature,
+                        args.router_variant).to(device)
 
     optimizer, lr_scheduler = prepare_training(args, model)
 
