@@ -394,3 +394,41 @@ class GSCViTTSSRWrapper(GSCViTWrapper):
         """Return logits plus detached relevance maps for analysis."""
         logits = self.forward(x)
         return logits, self.dynamic_router.last_alpha, self.dynamic_router.last_beta
+
+
+class GSCViTDSSRWrapper(GSCViTWrapper):
+    """DSSR: TSSR alpha-driven spectral state routing before original GSSA."""
+
+    def __init__(self, in_channels, num_classes, patch_size, spectral_groups=8,
+                 route_strength=0.5, route_temperature=1.0,
+                 router_variant="full", state_enabled=True):
+        super().__init__(in_channels, num_classes, patch_size)
+        from compare.dynamic_router import SpectralSpatialRouter, SpectralStateRouter
+        self.dynamic_router = SpectralSpatialRouter(
+            channels=self.net.feature_dim, num_groups=spectral_groups,
+            route_strength=route_strength, temperature=route_temperature,
+            router_variant=router_variant,
+        )
+        self.state_router = SpectralStateRouter(
+            channels=self.net.feature_dim, num_groups=spectral_groups,
+            enabled=state_enabled,
+        )
+
+    def _route(self, features):
+        routed, alpha, beta = self.dynamic_router.route(features)
+        state_feat = self.state_router(routed, alpha)
+        return state_feat, alpha, beta
+
+    def forward(self, x):
+        features = self.forward_features(x, pre_gssa_adapter=self._route_adapter)
+        return self.net.mlp_head(features)
+
+    def _route_adapter(self, features):
+        state_feat, _, _ = self._route(features)
+        return state_feat
+
+    def forward_with_routing(self, x):
+        logits = self.forward(x)
+        return (logits, self.dynamic_router.last_alpha, self.dynamic_router.last_beta,
+                self.state_router.last_permutation,
+                self.state_router.last_inverse_permutation)

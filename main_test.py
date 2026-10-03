@@ -53,7 +53,7 @@ def args_parser():
     parser.add_argument('--PCA', type=int, default=None)
     
     parser.add_argument('--model_name', type=str, default='baseline', 
-                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'spectralformer', 'ssftt'],
+                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'gscvit_dssr', 'spectralformer', 'ssftt'],
                         help='Model routing')
     parser.add_argument('--spectral_groups', type=int, default=8,
                         help='TSSR latent spectral groups')

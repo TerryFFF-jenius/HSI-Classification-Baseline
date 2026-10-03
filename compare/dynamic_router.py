@@ -211,3 +211,55 @@ class SpectralSpatialRouter(nn.Module):
     def forward(self, x):
         routed, _, _ = self.route(x)
         return routed
+
+
+class SpectralStateRouter(nn.Module):
+    """Alpha-driven spectral state propagation before the original GSSA."""
+
+    def __init__(self, channels, num_groups=8, state_dim=None, enabled=True):
+        super().__init__()
+        if channels <= 0 or num_groups <= 0 or channels % num_groups != 0:
+            raise ValueError("channels must be positive and divisible by num_groups")
+        self.channels = channels
+        self.num_groups = num_groups
+        self.channels_per_group = channels // num_groups
+        self.enabled = bool(enabled)
+        state_dim = state_dim or self.channels_per_group
+        self.to_state = nn.Linear(self.channels_per_group, state_dim)
+        self.state_update = nn.GRUCell(self.channels_per_group, state_dim)
+        self.from_state = nn.Linear(state_dim, self.channels_per_group)
+        self.mix = nn.Parameter(torch.tensor(0.5))
+        self.last_permutation = None
+        self.last_inverse_permutation = None
+
+    def forward(self, route_feat, alpha):
+        if route_feat.dim() != 4:
+            raise ValueError("route_feat must have shape (B, C, H, W)")
+        if route_feat.shape[1] != self.channels:
+            raise ValueError(f"expected {self.channels} channels, got {route_feat.shape[1]}")
+        if alpha.shape != (route_feat.shape[0], self.num_groups):
+            raise ValueError("alpha must have shape (B, num_groups)")
+        if not self.enabled:
+            self.last_permutation = None
+            self.last_inverse_permutation = None
+            return route_feat
+
+        b, _, h, w = route_feat.shape
+        groups = route_feat.reshape(b, self.num_groups, self.channels_per_group, h, w)
+        permutation = torch.argsort(alpha, dim=1, descending=True)
+        inverse = torch.argsort(permutation, dim=1)
+        gather = permutation[:, :, None, None, None].expand(-1, -1, self.channels_per_group, h, w)
+        ordered = groups.gather(1, gather)
+        tokens = ordered.permute(0, 1, 3, 4, 2).reshape(b * h * w, self.num_groups, self.channels_per_group)
+        state = self.to_state(tokens[:, 0])
+        outputs = [tokens[:, 0]]
+        for index in range(1, self.num_groups):
+            state = self.state_update(tokens[:, index], state)
+            outputs.append(tokens[:, index] + torch.tanh(self.mix) * self.from_state(state))
+        propagated = torch.stack(outputs, dim=1).reshape(b, h, w, self.num_groups, self.channels_per_group)
+        propagated = propagated.permute(0, 3, 4, 1, 2)
+        restore = inverse[:, :, None, None, None].expand(-1, -1, self.channels_per_group, h, w)
+        restored = propagated.gather(1, restore).reshape(b, self.channels, h, w)
+        self.last_permutation = permutation.detach()
+        self.last_inverse_permutation = inverse.detach()
+        return restored

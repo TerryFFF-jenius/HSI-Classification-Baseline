@@ -8,7 +8,7 @@ from compare.lite_hcnet import LiteHCNetWrapper
 from compare.lssan import LSSAN
 from compare.msdan import MSDAN
 from compare.simpoolformer import SimPoolFormer
-from compare.gscvit import GSCViTWrapper, GSCViTTSSRWrapper  # [新增]
+from compare.gscvit import GSCViTWrapper, GSCViTTSSRWrapper, GSCViTDSSRWrapper  # [新增]
 from compare.spectralformer import SpectralFormerWrapper  # [新增]
 from compare.ssftt import SSFTTWrapper  # [新增]
 
@@ -31,6 +31,7 @@ _MODEL_REGISTRY = {
     'simpoolformer': SimPoolFormer,
     'gscvit': GSCViTWrapper,  # [新增]
     'gscvit_tssr': GSCViTTSSRWrapper,
+    'gscvit_dssr': GSCViTDSSRWrapper,
     'spectralformer': SpectralFormerWrapper,  # [新增]
     'ssftt': SSFTTWrapper,  # [新增]
 }
@@ -58,6 +59,12 @@ def build_model(model_name, in_channels, num_classes, patch_size=7,
     elif model_name == 'gscvit':
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'gscvit_tssr':
+        return model_cls(in_channels, num_classes, patch_size,
+                         spectral_groups=spectral_groups,
+                         route_strength=route_strength,
+                         route_temperature=route_temperature,
+                         router_variant=router_variant)
+    elif model_name == 'gscvit_dssr':
         return model_cls(in_channels, num_classes, patch_size,
                          spectral_groups=spectral_groups,
                          route_strength=route_strength,
