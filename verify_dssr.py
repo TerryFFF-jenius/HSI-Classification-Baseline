@@ -23,6 +23,7 @@ def main():
     assert alpha.shape == (args.batch_size, 8)
     assert beta.shape == (args.batch_size, 1, 9, 9)
     assert permutation.shape == inverse.shape == (args.batch_size, 8)
+    assert model.state_router.last_beta.shape == (args.batch_size, 1, 9, 9)
     identity = torch.arange(8).expand_as(permutation)
     assert torch.equal(torch.gather(permutation, 1, inverse), identity)
     assert all(torch.isfinite(p).all() for p in model.parameters() if p.grad is not None)

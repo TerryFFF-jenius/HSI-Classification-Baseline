@@ -397,7 +397,12 @@ class GSCViTTSSRWrapper(GSCViTWrapper):
 
 
 class GSCViTDSSRWrapper(GSCViTWrapper):
-    """DSSR: TSSR alpha-driven spectral state routing before original GSSA."""
+    """DSSR spectral branch: TSSR alpha/beta to bidirectional state route.
+
+    Alpha determines the spectral propagation order.  Beta is passed through
+    from TSSR and gates the state residual magnitude at each spatial location;
+    no separate relevance estimator or spatial state sequence is introduced.
+    """
 
     def __init__(self, in_channels, num_classes, patch_size, spectral_groups=8,
                  route_strength=0.5, route_temperature=1.0,
@@ -416,7 +421,7 @@ class GSCViTDSSRWrapper(GSCViTWrapper):
 
     def _route(self, features):
         routed, alpha, beta = self.dynamic_router.route(features)
-        state_feat = self.state_router(routed, alpha)
+        state_feat = self.state_router(routed, alpha, beta)
         return state_feat, alpha, beta
 
     def forward(self, x):

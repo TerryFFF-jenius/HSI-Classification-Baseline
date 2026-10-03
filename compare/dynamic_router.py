@@ -1,9 +1,8 @@
-"""Task-adaptive spectral-spatial soft routing for GSC-ViT.
+"""Task-adaptive routing and spectral state propagation for GSC-ViT.
 
-This module implements the first innovation only.  It estimates relevance for
-latent spectral groups and spatial tokens, then applies a residual soft
-reweighting.  It deliberately does not perform hard Top-K pruning or state
-propagation; those belong to later experimental stages.
+The soft spectral-spatial route implements innovation 1.  The
+alpha-driven bidirectional spectral state route implements the spectral-only
+part of innovation 2; spatial state routing remains intentionally absent.
 """
 
 import torch
@@ -214,7 +213,12 @@ class SpectralSpatialRouter(nn.Module):
 
 
 class SpectralStateRouter(nn.Module):
-    """Alpha-driven spectral state propagation before the original GSSA."""
+    """Alpha-driven bidirectional spectral state propagation before GSSA.
+
+    ``alpha`` defines the sample-specific spectral-group order.  Forward and
+    reverse recurrent passes are fused in that order, then ``inverse_perm``
+    restores the original channel layout for the downstream GSSA.
+    """
 
     def __init__(self, channels, num_groups=8, state_dim=None, enabled=True):
         super().__init__()
@@ -226,19 +230,28 @@ class SpectralStateRouter(nn.Module):
         self.enabled = bool(enabled)
         state_dim = state_dim or self.channels_per_group
         self.to_state = nn.Linear(self.channels_per_group, state_dim)
-        self.state_update = nn.GRUCell(self.channels_per_group, state_dim)
+        self.forward_update = nn.GRUCell(self.channels_per_group, state_dim)
+        self.backward_update = nn.GRUCell(self.channels_per_group, state_dim)
         self.from_state = nn.Linear(state_dim, self.channels_per_group)
         self.mix = nn.Parameter(torch.tensor(0.5))
         self.last_permutation = None
         self.last_inverse_permutation = None
+        self.last_beta = None
 
-    def forward(self, route_feat, alpha):
+    def forward(self, route_feat, alpha, beta=None):
         if route_feat.dim() != 4:
             raise ValueError("route_feat must have shape (B, C, H, W)")
         if route_feat.shape[1] != self.channels:
             raise ValueError(f"expected {self.channels} channels, got {route_feat.shape[1]}")
         if alpha.shape != (route_feat.shape[0], self.num_groups):
             raise ValueError("alpha must have shape (B, num_groups)")
+        if beta is not None:
+            expected_beta = (route_feat.shape[0], 1, route_feat.shape[-2], route_feat.shape[-1])
+            if tuple(beta.shape) != expected_beta:
+                raise ValueError(f"beta must have shape {expected_beta}")
+            self.last_beta = beta.detach()
+        else:
+            self.last_beta = None
         if not self.enabled:
             self.last_permutation = None
             self.last_inverse_permutation = None
@@ -250,12 +263,39 @@ class SpectralStateRouter(nn.Module):
         inverse = torch.argsort(permutation, dim=1)
         gather = permutation[:, :, None, None, None].expand(-1, -1, self.channels_per_group, h, w)
         ordered = groups.gather(1, gather)
-        tokens = ordered.permute(0, 1, 3, 4, 2).reshape(b * h * w, self.num_groups, self.channels_per_group)
+        # Make each sequence one spatial location with all ordered spectral
+        # groups: (B, H, W, G, C) -> (B*H*W, G, C).
+        tokens = ordered.permute(0, 3, 4, 1, 2).reshape(
+            b * h * w, self.num_groups, self.channels_per_group
+        )
+        if beta is None:
+            spatial_gain = torch.ones(
+                b * h * w, 1, dtype=route_feat.dtype, device=route_feat.device
+            )
+        else:
+            # beta is reused as the TSSR spatial confidence.  It modulates
+            # state residual magnitude while alpha alone defines spectral
+            # propagation order; no spatial state sequence is introduced.
+            spatial_gain = beta[:, 0].reshape(b * h * w, 1)
+        forward_states = []
         state = self.to_state(tokens[:, 0])
-        outputs = [tokens[:, 0]]
-        for index in range(1, self.num_groups):
-            state = self.state_update(tokens[:, index], state)
-            outputs.append(tokens[:, index] + torch.tanh(self.mix) * self.from_state(state))
+        for index in range(self.num_groups):
+            if index > 0:
+                state = self.forward_update(tokens[:, index], state)
+            forward_states.append(state)
+
+        backward_states = [None] * self.num_groups
+        state = self.to_state(tokens[:, -1])
+        for index in range(self.num_groups - 1, -1, -1):
+            if index < self.num_groups - 1:
+                state = self.backward_update(tokens[:, index], state)
+            backward_states[index] = state
+
+        outputs = []
+        for index in range(self.num_groups):
+            fused_state = forward_states[index] + backward_states[index]
+            state_residual = self.from_state(fused_state) * spatial_gain
+            outputs.append(tokens[:, index] + torch.tanh(self.mix) * state_residual)
         propagated = torch.stack(outputs, dim=1).reshape(b, h, w, self.num_groups, self.channels_per_group)
         propagated = propagated.permute(0, 3, 4, 1, 2)
         restore = inverse[:, :, None, None, None].expand(-1, -1, self.channels_per_group, h, w)
