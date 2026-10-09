@@ -83,7 +83,7 @@ def args_parser():
     
     # === 新增：注册模型路由参数 ===
     parser.add_argument('--model_name', type=str, default='baseline', 
-                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'gscvit_dssr', 'spectralformer', 'ssftt'],
+                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'gscvit_dssr', 'gscvit_spatial', 'gscvit_dssr_spatial', 'spectralformer', 'ssftt'],
                         help='Model routing')
     parser.add_argument('--band_patches', type=int, default=1, help='CACFTNet param')
     parser.add_argument('--mode', choices=['ViT', 'CAF'], default='CAF', help='CACFTNet param')
@@ -96,6 +96,10 @@ def args_parser():
     parser.add_argument('--router_variant', type=str, default='full',
                         choices=['full', 'no_spectral', 'no_spatial'],
                         help='TSSR ablation variant')
+    parser.add_argument('--spatial_state_enabled', type=str2bool, default=False,
+                        help='Enable phase-six beta-ordered spatial state routing')
+    parser.add_argument('--spatial_state_strength', type=float, default=0.5,
+                        help='Residual strength for phase-six spatial state routing')
     args = parser.parse_args()
     return args
 
@@ -254,6 +258,8 @@ def main():
             'route_strength': args.route_strength,
             'route_temperature': args.route_temperature,
             'router_variant': args.router_variant,
+            'spatial_state_enabled': args.spatial_state_enabled,
+            'spatial_state_strength': args.spatial_state_strength,
         }, ensure_ascii=False) + '\n')
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -261,7 +267,8 @@ def main():
     model = build_model(args.model_name, args.in_channels, args.num_class,
                         args.patch_size, args.spectral_groups,
                         args.route_strength, args.route_temperature,
-                        args.router_variant).to(device)
+                        args.router_variant, args.spatial_state_enabled,
+                        args.spatial_state_strength).to(device)
 
     optimizer, lr_scheduler = prepare_training(args, model)
 

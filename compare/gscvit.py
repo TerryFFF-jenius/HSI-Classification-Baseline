@@ -437,3 +437,139 @@ class GSCViTDSSRWrapper(GSCViTWrapper):
         return (logits, self.dynamic_router.last_alpha, self.dynamic_router.last_beta,
                 self.state_router.last_permutation,
                 self.state_router.last_inverse_permutation)
+
+
+class GSCViTSpatialWrapper(GSCViTWrapper):
+    """TSSR followed by beta-driven spatial state routing.
+
+    This is the phase-six spatial-only path.  TSSR still produces both alpha
+    and beta, but only beta is used to order the 81 spatial tokens.  The
+    restored feature map is passed directly to the original GSSA block.
+    """
+
+    def __init__(
+        self,
+        in_channels,
+        num_classes,
+        patch_size,
+        spectral_groups=8,
+        route_strength=0.5,
+        route_temperature=1.0,
+        router_variant="full",
+        spatial_state_strength=0.5,
+        spatial_state_enabled=True,
+    ):
+        super().__init__(in_channels, num_classes, patch_size)
+        from compare.dynamic_router import SpectralSpatialRouter, SpatialStateRouter
+
+        self.dynamic_router = SpectralSpatialRouter(
+            channels=self.net.feature_dim,
+            num_groups=spectral_groups,
+            route_strength=route_strength,
+            temperature=route_temperature,
+            router_variant=router_variant,
+        )
+        self.spatial_state_router = SpatialStateRouter(
+            channels=self.net.feature_dim,
+            state_strength=spatial_state_strength,
+            enabled=spatial_state_enabled,
+        )
+
+    def _route(self, features):
+        routed, alpha, beta = self.dynamic_router.route(features)
+        spatial_state_feat = self.spatial_state_router(routed, beta)
+        return spatial_state_feat, alpha, beta
+
+    def _route_adapter(self, features):
+        state_feat, _, _ = self._route(features)
+        return state_feat
+
+    def forward(self, x):
+        features = self.forward_features(x, pre_gssa_adapter=self._route_adapter)
+        return self.net.mlp_head(features)
+
+    def forward_with_routing(self, x):
+        logits = self.forward(x)
+        return (
+            logits,
+            self.dynamic_router.last_alpha,
+            self.dynamic_router.last_beta,
+            self.spatial_state_router.last_permutation,
+            self.spatial_state_router.last_inverse_permutation,
+        )
+
+
+class GSCViTDSSRSpatialWrapper(GSCViTWrapper):
+    """TSSR -> spectral state -> spatial state -> original GSSA path."""
+
+    def __init__(
+        self,
+        in_channels,
+        num_classes,
+        patch_size,
+        spectral_groups=8,
+        route_strength=0.5,
+        route_temperature=1.0,
+        router_variant="full",
+        spatial_state_strength=0.5,
+        spatial_state_enabled=True,
+        spectral_state_enabled=True,
+    ):
+        super().__init__(in_channels, num_classes, patch_size)
+        from compare.dynamic_router import (
+            SpectralSpatialRouter,
+            SpectralStateRouter,
+            SpatialStateRouter,
+        )
+
+        self.dynamic_router = SpectralSpatialRouter(
+            channels=self.net.feature_dim,
+            num_groups=spectral_groups,
+            route_strength=route_strength,
+            temperature=route_temperature,
+            router_variant=router_variant,
+        )
+        # Keep the historical ``state_router`` module name so that disabling
+        # the new spatial stage can reproduce ``gscvit_dssr`` checkpoints and
+        # state dictionaries exactly.
+        self.state_router = SpectralStateRouter(
+            channels=self.net.feature_dim,
+            num_groups=spectral_groups,
+            enabled=spectral_state_enabled,
+        )
+        self.spatial_state_router = SpatialStateRouter(
+            channels=self.net.feature_dim,
+            state_strength=spatial_state_strength,
+            enabled=spatial_state_enabled,
+        )
+
+    def _route(self, features):
+        routed, alpha, beta = self.dynamic_router.route(features)
+        spectral_state_feat = self.state_router(routed, alpha, beta)
+        spatial_state_feat = self.spatial_state_router(spectral_state_feat, beta)
+        return spatial_state_feat, alpha, beta
+
+    def _route_adapter(self, features):
+        state_feat, _, _ = self._route(features)
+        return state_feat
+
+    def forward(self, x):
+        features = self.forward_features(x, pre_gssa_adapter=self._route_adapter)
+        return self.net.mlp_head(features)
+
+    def forward_with_routing(self, x):
+        logits = self.forward(x)
+        return (
+            logits,
+            self.dynamic_router.last_alpha,
+            self.dynamic_router.last_beta,
+            self.state_router.last_permutation,
+            self.state_router.last_inverse_permutation,
+            self.spatial_state_router.last_permutation,
+            self.spatial_state_router.last_inverse_permutation,
+        )
+
+    @property
+    def spectral_state_router(self):
+        """Compatibility alias for the phase-six spectral state module."""
+        return self.state_router

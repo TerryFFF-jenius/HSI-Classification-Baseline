@@ -1,8 +1,10 @@
-"""Task-adaptive routing and spectral state propagation for GSC-ViT.
+"""Task-adaptive routing and state propagation for GSC-ViT.
 
 The soft spectral-spatial route implements innovation 1.  The
 alpha-driven bidirectional spectral state route implements the spectral-only
-part of innovation 2; spatial state routing remains intentionally absent.
+part of innovation 2.  ``SpatialStateRouter`` extends the same state
+propagation idea to beta-ordered spatial tokens while restoring the original
+2-D layout before GSSA.
 """
 
 import torch
@@ -302,4 +304,138 @@ class SpectralStateRouter(nn.Module):
         restored = propagated.gather(1, restore).reshape(b, self.channels, h, w)
         self.last_permutation = permutation.detach()
         self.last_inverse_permutation = inverse.detach()
+        return restored
+
+
+class SpatialStateRouter(nn.Module):
+    """Beta-ordered spatial state propagation before the original GSSA.
+
+    The router uses the spatial confidence map produced by TSSR to order the
+    ``H*W`` tokens independently for every sample.  Propagation is performed
+    on the ordered sequence with the same pure-PyTorch bidirectional GRU
+    executor used by :class:`SpectralStateRouter`.  The inverse permutation is
+    applied before returning so the downstream GSSA always receives the
+    original spatial layout.
+
+    Parameters
+    ----------
+    channels : int
+        Number of feature channels in the routed feature map.
+    state_dim : int, optional
+        Recurrent state width.  Defaults to ``channels``.
+    state_strength : float, default=0.5
+        Residual strength of the state propagation.  This is a spatial-state
+        parameter and does not change the meaning of TSSR's ``route_strength``.
+    enabled : bool, default=True
+        When false, return the input feature map unchanged.
+    """
+
+    def __init__(self, channels, state_dim=None, state_strength=0.5, enabled=True):
+        super().__init__()
+        if channels <= 0:
+            raise ValueError("channels must be positive")
+        if state_strength < 0 or state_strength > 1:
+            raise ValueError("state_strength must be in [0, 1]")
+        self.channels = int(channels)
+        self.state_dim = int(state_dim or channels)
+        self.state_strength = float(state_strength)
+        self.enabled = bool(enabled)
+
+        self.to_state = nn.Linear(self.channels, self.state_dim)
+        self.forward_update = nn.GRUCell(self.channels, self.state_dim)
+        self.backward_update = nn.GRUCell(self.channels, self.state_dim)
+        self.from_state = nn.Linear(self.state_dim, self.channels)
+        self.mix = nn.Parameter(torch.tensor(0.5))
+
+        self.last_permutation = None
+        self.last_inverse_permutation = None
+        self.last_beta = None
+        self.last_space_tokens = None
+
+    @staticmethod
+    def _stable_argsort(scores):
+        """Sort scores reproducibly, including when values are tied."""
+        try:
+            return torch.argsort(scores, dim=1, descending=True, stable=True)
+        except TypeError:  # Older PyTorch versions do not expose ``stable``.
+            return torch.argsort(scores, dim=1, descending=True)
+
+    def _normalize_beta(self, beta, batch, height, width):
+        if beta.dim() == 4:
+            expected = (batch, 1, height, width)
+            if tuple(beta.shape) != expected:
+                raise ValueError(f"beta must have shape {expected} or (B, H, W)")
+            return beta[:, 0]
+        if beta.dim() == 3:
+            expected = (batch, height, width)
+            if tuple(beta.shape) != expected:
+                raise ValueError(f"beta must have shape (B, H, W), got {tuple(beta.shape)}")
+            return beta
+        raise ValueError("beta must have shape (B, 1, H, W) or (B, H, W)")
+
+    def forward(self, route_feat, beta):
+        if route_feat.dim() != 4:
+            raise ValueError("route_feat must have shape (B, C, H, W)")
+        batch, channels, height, width = route_feat.shape
+        if channels != self.channels:
+            raise ValueError(
+                f"expected {self.channels} channels, got {channels}"
+            )
+        beta_map = self._normalize_beta(beta, batch, height, width)
+        self.last_beta = beta.detach()
+
+        if not self.enabled:
+            self.last_permutation = None
+            self.last_inverse_permutation = None
+            self.last_space_tokens = None
+            return route_feat
+
+        num_tokens = height * width
+        # (B, C, H, W) -> (B, H*W, C), preserving row-major spatial indices.
+        space_tokens = route_feat.permute(0, 2, 3, 1).reshape(
+            batch, num_tokens, channels
+        )
+        spatial_score = beta_map.reshape(batch, num_tokens)
+        permutation = self._stable_argsort(spatial_score)
+        inverse = torch.argsort(permutation, dim=1)
+        gather_index = permutation.unsqueeze(-1).expand(-1, -1, channels)
+        ordered = space_tokens.gather(1, gather_index)
+        ordered_gain = spatial_score.gather(1, permutation).unsqueeze(-1)
+
+        # One sequence per sample.  The two directions reuse the validated
+        # GRUCell state executor from the spectral state route.
+        forward_states = []
+        state = self.to_state(ordered[:, 0])
+        for index in range(num_tokens):
+            if index > 0:
+                state = self.forward_update(ordered[:, index], state)
+            forward_states.append(state)
+
+        backward_states = [None] * num_tokens
+        state = self.to_state(ordered[:, -1])
+        for index in range(num_tokens - 1, -1, -1):
+            if index < num_tokens - 1:
+                state = self.backward_update(ordered[:, index], state)
+            backward_states[index] = state
+
+        propagated = []
+        for index in range(num_tokens):
+            fused_state = forward_states[index] + backward_states[index]
+            residual = self.from_state(fused_state)
+            residual = residual * ordered_gain
+            propagated.append(
+                ordered[:, index]
+                + self.state_strength * torch.tanh(self.mix) * residual
+            )
+        propagated = torch.stack(propagated, dim=1)
+
+        restore_index = inverse.unsqueeze(-1).expand(-1, -1, channels)
+        restored_tokens = propagated.gather(1, restore_index)
+        restored = restored_tokens.reshape(batch, height, width, channels).permute(
+            0, 3, 1, 2
+        )
+
+        self.last_permutation = permutation.detach()
+        self.last_inverse_permutation = inverse.detach()
+        self.last_space_tokens = space_tokens.detach()
         return restored

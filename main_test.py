@@ -53,7 +53,7 @@ def args_parser():
     parser.add_argument('--PCA', type=int, default=None)
     
     parser.add_argument('--model_name', type=str, default='baseline', 
-                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'gscvit_dssr', 'spectralformer', 'ssftt'],
+                        choices=['baseline', 'cacft', 'lite_hcnet', 'lssan', 'msdan', 'simpoolformer', 'gscvit', 'gscvit_tssr', 'gscvit_dssr', 'gscvit_spatial', 'gscvit_dssr_spatial', 'spectralformer', 'ssftt'],
                         help='Model routing')
     parser.add_argument('--spectral_groups', type=int, default=8,
                         help='TSSR latent spectral groups')
@@ -64,6 +64,10 @@ def args_parser():
     parser.add_argument('--router_variant', type=str, default='full',
                         choices=['full', 'no_spectral', 'no_spatial'],
                         help='TSSR ablation variant')
+    parser.add_argument('--spatial_state_enabled', type=str2bool, default=False,
+                        help='Enable phase-six beta-ordered spatial state routing')
+    parser.add_argument('--spatial_state_strength', type=float, default=0.5,
+                        help='Residual strength for phase-six spatial state routing')
     parser.add_argument('--exp_id', type=str, default='baseline_01', help='experiment id for output isolation') 
     args = parser.parse_args()
     return args
@@ -164,6 +168,8 @@ def test(model, device, test_loader, args):
         "spectral_groups": args.spectral_groups,
         "route_strength": args.route_strength,
         "route_temperature": args.route_temperature,
+        "spatial_state_enabled": args.spatial_state_enabled,
+        "spatial_state_strength": args.spatial_state_strength,
         "oa": float(oa),
         "aa": float(aa),
         "kappa": float(kappa_percentage),
@@ -210,7 +216,8 @@ def main():
     model = build_model(args.model_name, args.in_channels, args.num_class,
                         args.patch_size, args.spectral_groups,
                         args.route_strength, args.route_temperature,
-                        args.router_variant).to(device)
+                        args.router_variant, args.spatial_state_enabled,
+                        args.spatial_state_strength).to(device)
     
     # 自动寻址：去实验目录下捞取精度最高的 .pth
     if not getattr(args, 'modelfile', None) or not os.path.exists(args.modelfile):
