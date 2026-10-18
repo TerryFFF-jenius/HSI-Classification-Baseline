@@ -422,7 +422,8 @@ class SpatialStateRouter(nn.Module):
         for index in range(num_tokens):
             fused_state = forward_states[index] + backward_states[index]
             residual = self.from_state(fused_state)
-            residual = residual * ordered_gain
+            # Each loop iteration handles one ordered token: [B, C] * [B, 1].
+            residual = residual * ordered_gain[:, index]
             propagated.append(
                 ordered[:, index]
                 + self.state_strength * torch.tanh(self.mix) * residual
