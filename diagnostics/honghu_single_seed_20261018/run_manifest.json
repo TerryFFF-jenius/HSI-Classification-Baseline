@@ -1,0 +1,40 @@
+{
+  "diagnostic_id": "honghu_single_seed_20261018",
+  "status": "prepared_not_executed",
+  "dataset": "HongHu",
+  "training_seed": 20261017,
+  "split_seed": 20261018,
+  "total_runs": 4,
+  "total_epochs": 800,
+  "models": [
+    {"model_name": "gscvit_tssr", "description": "TSSR", "spatial_state_enabled": false},
+    {"model_name": "gscvit_dssr", "description": "TSSR -> spectral state routing", "spatial_state_enabled": false},
+    {"model_name": "gscvit_spatial", "description": "TSSR -> spatial state routing", "spatial_state_enabled": true},
+    {"model_name": "gscvit_dssr_spatial", "description": "TSSR -> spectral state routing -> spatial state routing", "spatial_state_enabled": true}
+  ],
+  "shared_assets": [
+    "assets/split_indices.npz",
+    "assets/sample_index_map.npz",
+    "assets/pca_transform.npz",
+    "assets/pca_scene.npz",
+    "assets/validation_batch.npz",
+    "assets/split_manifest.json",
+    "assets/file_manifest.json"
+  ],
+  "checkpoint_rule": "validation OA maximum; validation every 2 epochs; ties overwrite with later record via >=; test sealed",
+  "comparison_formulas": {
+    "spatial_single_increment": "OA(gscvit_spatial) - OA(gscvit_tssr)",
+    "serial_spatial_conditional_increment": "OA(gscvit_dssr_spatial) - OA(gscvit_dssr)",
+    "interaction_difference": "(serial_spatial_conditional_increment) - (spatial_single_increment)"
+  },
+  "adaptation_gate": {
+    "all_four_share_assets_and_config": "pending",
+    "spatial_single_increment_positive": "pending",
+    "serial_conditional_increment_non_positive": "pending",
+    "direction_holds_for_three_consecutive_validation_records_near_selected_checkpoint": "pending",
+    "residual_diagnostic_supports_mechanism": "pending",
+    "single_followup_allowed": "spatial_state_strength 0.5 -> 0.25",
+    "forbidden_followups": ["additional seeds", "strength sweep", "learning-rate change", "loss change", "normalization change", "State Fusion"]
+  },
+  "history_search": "forbidden; this is a new diagnostic asset and not a historical reproduction"
+}

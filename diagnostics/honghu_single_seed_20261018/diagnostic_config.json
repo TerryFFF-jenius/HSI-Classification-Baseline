@@ -1,0 +1,39 @@
+{
+  "diagnostic_id": "honghu_single_seed_20261018",
+  "status": "prepared_assets_only",
+  "dataset": "HongHu",
+  "training_seed": 20261017,
+  "split_seed": 20261018,
+  "train_ratio": 0.01,
+  "val_ratio": 0.01,
+  "pca_components": 15,
+  "pca_whiten": true,
+  "pca_random_state": 20261017,
+  "patch_size": 7,
+  "zero_padding": "padWithZeros, margin=patch_size//2",
+  "remove_zero_labels": true,
+  "batch_size": 32,
+  "epochs": 200,
+  "optimizer": "adamw",
+  "learning_rate": 0.0003,
+  "weight_decay": 0.005,
+  "scheduler": "poly",
+  "lr_decay": 0.95,
+  "spectral_groups": 8,
+  "route_strength": 0.5,
+  "route_temperature": 1.0,
+  "router_variant": "full",
+  "spatial_state_strength": 0.5,
+  "validation_frequency_epochs": 2,
+  "checkpoint_selection": {
+    "primary": "validation_oa_max",
+    "tie_rule": "latest_validation_record",
+    "test_is_sealed": true
+  },
+  "models": [
+    {"model_name": "gscvit_tssr", "spatial_state_enabled": false},
+    {"model_name": "gscvit_dssr", "spatial_state_enabled": false},
+    {"model_name": "gscvit_spatial", "spatial_state_enabled": true},
+    {"model_name": "gscvit_dssr_spatial", "spatial_state_enabled": true}
+  ]
+}
