@@ -1,0 +1,26 @@
+{
+  "pca_scene.npz": {
+    "bytes": 24828991,
+    "sha256": "d3d345eea88154f41f0edd0511a6a2d5a15e6b19c1619812e1da45539ef12227"
+  },
+  "pca_transform.npz": {
+    "bytes": 20674,
+    "sha256": "a6a5b1ec18b3d2fb2a8f15325a06c42a62e341434472b1e02b6046392c47669f"
+  },
+  "sample_index_map.npz": {
+    "bytes": 700976,
+    "sha256": "7e837bdfc39e98c73596ffd40f2ccf712037ea022dea929e802d6de7364424e1"
+  },
+  "split_indices.npz": {
+    "bytes": 590131,
+    "sha256": "30378eeaa20070027b02f32e8f6ec06344fc25425c4a2e3cecbb2a1e6888065a"
+  },
+  "split_manifest.json": {
+    "bytes": 3020,
+    "sha256": "58c0110e1e80eafcd7db8a8bdc02486b811774df348a19fc2159cdf61a6f4eef"
+  },
+  "validation_batch.npz": {
+    "bytes": 72659,
+    "sha256": "7fb3c39c515676b1d658d4fd4ec2429fea0d496b52e47c7e5547fe0f74988c2d"
+  }
+}

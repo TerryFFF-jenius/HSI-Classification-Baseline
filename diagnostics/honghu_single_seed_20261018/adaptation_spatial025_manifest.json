@@ -1,0 +1,27 @@
+{
+  "task": "spatial_state_strength_minimal_adaptation_validation",
+  "status": "prepared_not_executed",
+  "dataset": "HongHu",
+  "model_name": "gscvit_dssr_spatial",
+  "spatial_state_strength": 0.25,
+  "baseline_spatial_state_strength": 0.5,
+  "training_seed": 20261017,
+  "split_seed": 20261018,
+  "epochs": 200,
+  "batch_size": 32,
+  "optimizer": "adamw",
+  "learning_rate": 0.0003,
+  "weight_decay": 0.005,
+  "scheduler": "poly",
+  "lr_decay": 0.95,
+  "validation_frequency_epochs": 2,
+  "checkpoint_selection": "validation OA max; ties select later validation record; test sealed",
+  "shared_assets": "diagnostics/honghu_single_seed_20261018/assets",
+  "baseline_checkpoint": {
+    "declared_path": "runs_20261018_exec_03/gscvit_dssr_spatial/checkpoint_epoch_192.pth",
+    "sha256": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304"
+  },
+  "output_dir": "runs_20261019_adapt_spatial025_exec_01",
+  "allowed_training_count": 1,
+  "forbidden": ["test evaluation", "additional seed", "strength sweep", "State Fusion", "model core edits", "git add", "git commit", "git push"]
+}

@@ -1,0 +1,131 @@
+{
+  "diagnostic_id": "honghu_single_seed_20261018",
+  "dataset": "HongHu",
+  "source": {
+    "image_path": "oridata\\HongHu\\WHU_Hi_HongHu.mat",
+    "label_path": "oridata\\HongHu\\WHU_Hi_HongHu_gt.mat",
+    "image_sha256": "394eebb36e70931711b02d127f73c641ad67a83a5bbfc5294b695b2f7336dfce",
+    "label_sha256": "afb4b455e078e308b64a51e4e1a9552ddffd2f8519eaa311ded94d74a96c2a41",
+    "image_shape": [
+      940,
+      475,
+      270
+    ],
+    "label_shape": [
+      940,
+      475
+    ]
+  },
+  "index_space": "nonzero_label_pixels_row_major",
+  "split_seed": 20261018,
+  "train_ratio": 0.01,
+  "val_ratio": 0.01,
+  "test_ratio": 0.98,
+  "counts": {
+    "train": 3866,
+    "validation": 3867,
+    "test": 378960
+  },
+  "class_counts_zero_based": {
+    "train": {
+      "0": 140,
+      "1": 35,
+      "2": 218,
+      "3": 1632,
+      "4": 62,
+      "5": 445,
+      "6": 241,
+      "7": 41,
+      "8": 108,
+      "9": 124,
+      "10": 110,
+      "11": 89,
+      "12": 225,
+      "13": 74,
+      "14": 10,
+      "15": 73,
+      "16": 30,
+      "17": 32,
+      "18": 87,
+      "19": 35,
+      "20": 14,
+      "21": 41
+    },
+    "validation": {
+      "0": 141,
+      "1": 35,
+      "2": 219,
+      "3": 1633,
+      "4": 62,
+      "5": 446,
+      "6": 241,
+      "7": 40,
+      "8": 109,
+      "9": 124,
+      "10": 110,
+      "11": 90,
+      "12": 225,
+      "13": 73,
+      "14": 10,
+      "15": 72,
+      "16": 30,
+      "17": 32,
+      "18": 87,
+      "19": 35,
+      "20": 13,
+      "21": 40
+    },
+    "test": {
+      "0": 13760,
+      "1": 3442,
+      "2": 21384,
+      "3": 160020,
+      "4": 6094,
+      "5": 43666,
+      "6": 23621,
+      "7": 3973,
+      "8": 10602,
+      "9": 12146,
+      "10": 10795,
+      "11": 8775,
+      "12": 22057,
+      "13": 7209,
+      "14": 982,
+      "15": 7117,
+      "16": 2950,
+      "17": 3153,
+      "18": 8538,
+      "19": 3416,
+      "20": 1301,
+      "21": 3959
+    }
+  },
+  "preprocessing": {
+    "pca_components": 15,
+    "pca_whiten": true,
+    "pca_random_state": 20261017,
+    "pca_fit_scope": "full_scene_before_patch_creation_and_split",
+    "patch_size": 7,
+    "zero_padding": "padWithZeros, margin=patch_size//2",
+    "remove_zero_labels": true,
+    "transpose": "NHWC to NCHW with singleton channel [B,H,W,C] -> [B,1,C,H,W]"
+  },
+  "training_seed": 20261017,
+  "git_snapshot": {
+    "head": "c5155ade22675d6110d380d9064091d1e74eec35",
+    "branch": "main",
+    "status_short": [
+      "M .gitignore",
+      "?? HanChuan_Comparison_Table.csv",
+      "?? HongHu_Comparison_Table.csv",
+      "?? LongKou_Comparison_Table.csv",
+      "?? PHASE6_SPATIAL_ROUTING.md",
+      "?? _make_unified_phase6_table.py",
+      "?? \"cvit.py verify_dssr.py\"",
+      "?? diagnostics/",
+      "?? phase5_DSSR_OA_AA_Kappa_summary.csv",
+      "?? x[0]"
+    ],
+    "status_sha256": "605f137b657feb15103f8dfd9873a012e08a9f1cec79f1de74bcfc4c32ab44c7"
+  }
+}

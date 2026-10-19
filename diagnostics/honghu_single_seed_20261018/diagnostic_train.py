@@ -10,6 +10,7 @@ import json
 import random
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,6 +36,16 @@ RUNTIME_CODE_FILES = (
     "diagnostics/honghu_single_seed_20261018/diagnostic_train.py",
 )
 
+ASSET_FILES = (
+    "split_indices.npz",
+    "sample_index_map.npz",
+    "pca_transform.npz",
+    "pca_scene.npz",
+    "validation_batch.npz",
+    "split_manifest.json",
+    "file_manifest.json",
+)
+
 
 def sha256_file(path):
     digest = hashlib.sha256()
@@ -42,6 +53,52 @@ def sha256_file(path):
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def collect_asset_identity(assets):
+    """Record every shared diagnostic asset without reading test labels."""
+    records = {}
+    for name in ASSET_FILES:
+        path = assets / name
+        record = {
+            "path": str(path),
+            "bytes": None,
+            "sha256": None,
+            "exists": path.is_file(),
+        }
+        if path.is_file():
+            record["bytes"] = path.stat().st_size
+            record["sha256"] = sha256_file(path)
+        records[name] = record
+    return records
+
+
+def validate_asset_identity(assets):
+    """Refuse to train when any shared asset differs from its manifest."""
+    manifest_path = assets / "file_manifest.json"
+    expected = json.loads(manifest_path.read_text(encoding="utf-8"))
+    observed = collect_asset_identity(assets)
+    mismatches = []
+    for name in ASSET_FILES:
+        record = observed[name]
+        expected_record = expected.get(name)
+        if name == "file_manifest.json":
+            if not record["exists"]:
+                mismatches.append(f"{name}: missing")
+            continue
+        if expected_record is None:
+            mismatches.append(f"{name}: absent from file_manifest.json")
+            continue
+        if not record["exists"]:
+            mismatches.append(f"{name}: missing")
+        elif record["bytes"] != expected_record.get("bytes") or record["sha256"] != expected_record.get("sha256"):
+            mismatches.append(
+                f"{name}: expected bytes={expected_record.get('bytes')} sha256={expected_record.get('sha256')}; "
+                f"observed bytes={record['bytes']} sha256={record['sha256']}"
+            )
+    if mismatches:
+        raise RuntimeError("asset identity mismatch; training not started: " + " | ".join(mismatches))
+    return observed
 
 
 def _git_result(root, *args):
@@ -208,17 +265,23 @@ def build_run_config(
     history,
     best_checkpoint,
     run_status,
+    output=None,
+    elapsed_seconds=None,
+    nonfinite_events=None,
+    actual_command=None,
 ):
-    return {
+    run_config = {
         "diagnostic_id": manifest["diagnostic_id"],
         "dataset": "HongHu",
         "model_name": args.model_name,
         "spatial_state_enabled": spatial_enabled,
         "seed": seed,
+        "split_seed": manifest.get("split_seed"),
         "device": str(device),
         "run_status": run_status,
         "assets_dir": str(assets),
         "assets_file_manifest_sha256": sha256_file(assets / "file_manifest.json"),
+        "assets": collect_asset_identity(assets),
         "config": {
             "epochs": 200,
             "batch_size": 32,
@@ -233,14 +296,31 @@ def build_run_config(
             "route_strength": 0.5,
             "route_temperature": 1.0,
             "router_variant": "full",
-            "spatial_state_strength": 0.5,
+            "spatial_state_strength": args.spatial_state_strength,
         },
         "checkpoint_selection": "validation OA max; ties select later validation record; test sealed",
         "best_checkpoint": best_checkpoint,
         "history": history,
+        "elapsed_seconds": elapsed_seconds,
+        "nonfinite_events": nonfinite_events or [],
+        "actual_command": actual_command or [sys.executable, *sys.argv],
         "code_root": str(Path(args.project_root).resolve()),
         "runtime_code_identity": runtime_identity,
+        "runtime_environment": {
+            "python_version": sys.version,
+            "pytorch_version": torch.__version__,
+            "cuda_available": bool(torch.cuda.is_available()),
+            "cuda_version": torch.version.cuda,
+        },
     }
+    if best_checkpoint and output is not None:
+        checkpoint_path = Path(output) / best_checkpoint
+        run_config["best_checkpoint_path"] = str(checkpoint_path.resolve())
+        run_config["best_checkpoint_sha256"] = sha256_file(checkpoint_path) if checkpoint_path.is_file() else None
+    else:
+        run_config["best_checkpoint_path"] = None
+        run_config["best_checkpoint_sha256"] = None
+    return run_config
 
 
 def write_run_config(output, run_config):
@@ -291,6 +371,12 @@ def main():
     parser.add_argument("--assets-dir", required=True)
     parser.add_argument("--model-name", choices=sorted(MODEL_FLAGS), required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument(
+        "--spatial-state-strength",
+        type=float,
+        default=0.5,
+        help="Spatial residual strength; default preserves the original 0.5 behavior.",
+    )
     args = parser.parse_args()
     root = Path(args.project_root).resolve()
     assets = Path(args.assets_dir).resolve()
@@ -298,9 +384,12 @@ def main():
     if output.exists() and any(output.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty output directory: {output}")
     output.mkdir(parents=True, exist_ok=True)
+    validate_asset_identity(assets)
     manifest = json.loads((assets / "split_manifest.json").read_text(encoding="utf-8"))
     if manifest["diagnostic_id"] != "honghu_single_seed_20261018":
         raise ValueError("unexpected diagnostic asset manifest")
+    if args.spatial_state_strength <= 0:
+        raise ValueError("spatial-state-strength must be positive")
 
     seed = 20261017
     random.seed(seed)
@@ -312,6 +401,8 @@ def main():
     spatial_enabled = MODEL_FLAGS[args.model_name]
     history = []
     best_checkpoint = None
+    nonfinite_events = []
+    start_time = time.monotonic()
     (train_x, train_y), (val_x, val_y) = build_split_tensors(assets)
     generator = torch.Generator().manual_seed(seed)
     train_loader = DataLoader(
@@ -329,7 +420,7 @@ def main():
         route_temperature=1.0,
         router_variant="full",
         spatial_state_enabled=spatial_enabled,
-        spatial_state_strength=0.5,
+        spatial_state_strength=args.spatial_state_strength,
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.005)
     scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -341,6 +432,9 @@ def main():
     run_config = build_run_config(
         manifest, args, assets, spatial_enabled, seed, device,
         runtime_identity, history, best_checkpoint, "started",
+        output=output,
+        elapsed_seconds=0.0,
+        nonfinite_events=nonfinite_events,
     )
     invalid_sources = [
         relative_path
@@ -362,38 +456,80 @@ def main():
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad(set_to_none=True)
-            loss = criterion(model(inputs), labels)
+            logits = model(inputs)
+            if not torch.isfinite(logits).all():
+                event = {"epoch": epoch, "stage": "train_logits", "message": "non-finite model output"}
+                nonfinite_events.append(event)
+                run_config["run_status"] = "failed_nonfinite"
+                run_config["nonfinite_events"] = nonfinite_events
+                run_config["elapsed_seconds"] = time.monotonic() - start_time
+                write_run_config(output, run_config)
+                raise FloatingPointError(json.dumps(event))
+            loss = criterion(logits, labels)
+            if not torch.isfinite(loss):
+                event = {"epoch": epoch, "stage": "train_loss", "message": "non-finite loss"}
+                nonfinite_events.append(event)
+                run_config["run_status"] = "failed_nonfinite"
+                run_config["nonfinite_events"] = nonfinite_events
+                run_config["elapsed_seconds"] = time.monotonic() - start_time
+                write_run_config(output, run_config)
+                raise FloatingPointError(json.dumps(event))
             loss.backward()
+            if any(parameter.grad is not None and not torch.isfinite(parameter.grad).all()
+                   for parameter in model.parameters()):
+                event = {"epoch": epoch, "stage": "train_gradient", "message": "non-finite gradient"}
+                nonfinite_events.append(event)
+                run_config["run_status"] = "failed_nonfinite"
+                run_config["nonfinite_events"] = nonfinite_events
+                run_config["elapsed_seconds"] = time.monotonic() - start_time
+                write_run_config(output, run_config)
+                raise FloatingPointError(json.dumps(event))
             optimizer.step()
             train_loss += float(loss.detach()) * labels.numel()
             train_count += labels.numel()
         scheduler.step()
-        if epoch % 2 != 0:
-            continue
-        model.eval()
-        logits_parts, label_parts = [], []
-        with torch.no_grad():
-            for inputs, labels in val_loader:
-                logits_parts.append(model(inputs.to(device)).cpu())
-                label_parts.append(labels)
-        metrics = metric_triplet(torch.cat(logits_parts), torch.cat(label_parts))
         record = {
             "epoch": epoch,
             "train_loss": train_loss / train_count,
-            "validation": metrics,
             "learning_rate": optimizer.param_groups[0]["lr"],
         }
+        if epoch % 2 == 0:
+            model.eval()
+            logits_parts, label_parts = [], []
+            with torch.no_grad():
+                for inputs, labels in val_loader:
+                    batch_logits = model(inputs.to(device))
+                    if not torch.isfinite(batch_logits).all():
+                        event = {"epoch": epoch, "stage": "validation_logits", "message": "non-finite model output"}
+                        nonfinite_events.append(event)
+                        run_config["run_status"] = "failed_nonfinite"
+                        run_config["nonfinite_events"] = nonfinite_events
+                        run_config["elapsed_seconds"] = time.monotonic() - start_time
+                        write_run_config(output, run_config)
+                        raise FloatingPointError(json.dumps(event))
+                    logits_parts.append(batch_logits.cpu())
+                    label_parts.append(labels)
+            metrics = metric_triplet(torch.cat(logits_parts), torch.cat(label_parts))
+            if not all(np.isfinite(value) for value in (metrics["oa"], metrics["aa"], metrics["kappa"])):
+                event = {"epoch": epoch, "stage": "validation_metrics", "message": "non-finite validation metric"}
+                nonfinite_events.append(event)
+                run_config["run_status"] = "failed_nonfinite"
+                run_config["nonfinite_events"] = nonfinite_events
+                run_config["elapsed_seconds"] = time.monotonic() - start_time
+                write_run_config(output, run_config)
+                raise FloatingPointError(json.dumps(event))
+            record["validation"] = metrics
+            # Match main_train.py: OA maximum, and >= means later ties replace earlier ones.
+            if metrics["oa"] >= best_oa:
+                best_oa = metrics["oa"]
+                checkpoint = output / f"checkpoint_epoch_{epoch:03d}.pth"
+                torch.save(model.state_dict(), checkpoint)
+                best_checkpoint = checkpoint.name
+                record["checkpoint_saved"] = True
+                record["checkpoint_sha256"] = sha256_file(checkpoint)
+            else:
+                record["checkpoint_saved"] = False
         history.append(record)
-        # Match main_train.py: OA maximum, and >= means later ties replace earlier ones.
-        if metrics["oa"] >= best_oa:
-            best_oa = metrics["oa"]
-            checkpoint = output / f"checkpoint_epoch_{epoch:03d}.pth"
-            torch.save(model.state_dict(), checkpoint)
-            best_checkpoint = checkpoint.name
-            record["checkpoint_saved"] = True
-            record["checkpoint_sha256"] = sha256_file(checkpoint)
-        else:
-            record["checkpoint_saved"] = False
     run_config = build_run_config(
         manifest,
         args,
@@ -405,6 +541,9 @@ def main():
         history,
         best_checkpoint,
         "completed",
+        output=output,
+        elapsed_seconds=time.monotonic() - start_time,
+        nonfinite_events=nonfinite_events,
     )
     write_run_config(output, run_config)
     print(json.dumps({"output_dir": str(output), "best_checkpoint": best_checkpoint, "device": str(device)}, indent=2))

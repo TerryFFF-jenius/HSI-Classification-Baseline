@@ -48,3 +48,28 @@ C:\Users\PC\Anaconda3\python.exe diagnostics\honghu_single_seed_20261018\diagnos
 ## 决策边界
 
 本目录只支持单 seed 筛查。只有四组 split、PCA、配置和 checkpoint 规则一致，且空间单路增量为正、串联空间条件增量为零或负、选定 checkpoint 附近至少三个连续 validation 记录保持该方向，并且 residual 诊断支持相应机制时，才可提出一次 `spatial_state_strength=0.25` 的后续筛选。不得在本目录增加 seed、扫强度、改损失/学习率、改归一化或加入 State Fusion。
+
+## 已批准的 0.25 适配运行
+
+本适配只运行一组 `gscvit_dssr_spatial`，显式传入 `spatial_state_strength=0.25`，并继续读取本目录已有 assets。推荐先把仓库和 assets 放到 AutoDL 的绝对路径，再确认新输出目录不存在或为空：
+
+```bash
+cd /root/HSI_Baseline
+python diagnostics/honghu_single_seed_20261018/run_spatial025_adaptation.py \
+  --project-root /root/HSI_Baseline \
+  --assets-dir /root/HSI_Baseline/diagnostics/honghu_single_seed_20261018/assets \
+  --output-dir /root/HSI_Baseline/runs_20261019_adapt_spatial025_exec_01
+```
+
+包装脚本固定模型、强度、seed、batch size 和 200 epoch 预算，并在训练返回后写 `execution_record.json`。训练失败、非有限值或输出目录非空时不得重用该目录；应保留现场并标记未完成。
+
+训练完成后，只用 validation history 与原 `spatial_state_strength=0.5` 的 `train_config.json` 做描述性比较：
+
+```bash
+python diagnostics/honghu_single_seed_20261018/compare_spatial025_validation.py \
+  --baseline-dir /root/HSI_Baseline/runs_20261018_exec_03/gscvit_dssr_spatial \
+  --adaptation-dir /root/HSI_Baseline/runs_20261019_adapt_spatial025_exec_01 \
+  --output /root/HSI_Baseline/runs_20261019_adapt_spatial025_exec_01/validation_comparison.json
+```
+
+比较脚本会校验 baseline checkpoint SHA-256，并拒绝读取 test 结果；它不执行训练、不选择 checkpoint，也不修改模型核心文件。
