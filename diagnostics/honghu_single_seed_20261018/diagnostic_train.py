@@ -18,6 +18,13 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+# When this file is launched by absolute path, Python puts only the
+# diagnostics directory on sys.path. Add the repository root so the
+# existing top-level models package remains importable.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from models import build_model
 
 
