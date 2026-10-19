@@ -1,0 +1,94 @@
+{
+  "command": [
+    "C:\\Users\\PC\\Anaconda3\\python.exe",
+    "diagnostics\\spatial_residual_gate_20261019\\verify_checkpoint.py"
+  ],
+  "status": "PASS",
+  "checkpoint": "D:\\HSI_Baseline\\checkpoint_inputs\\exec03_serial\\checkpoint_epoch_192.pth",
+  "expected_sha256": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304",
+  "source": "/root/HSI_Baseline_honghu_diag_20261018/diagnostics/honghu_single_seed_20261018/runs_20261018_exec_03/gscvit_dssr_spatial/checkpoint_epoch_192.pth",
+  "tolerance": {
+    "atol": 1e-06,
+    "rtol": 1e-05
+  },
+  "training_authorized": false,
+  "sha256_before": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304",
+  "environment": {
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+    "pytorch": "2.13.0+cpu",
+    "device": "cpu",
+    "dtype": "float32",
+    "threads": 1
+  },
+  "runtime_sources": {
+    "compare/gscvit.py": {
+      "path": "D:\\HSI_Baseline\\compare\\gscvit.py",
+      "sha256": "5deeca6bd8e30321369ed13a99cc21902839ecac910d669772044ad0c0e4e0e8"
+    },
+    "compare/dynamic_router.py": {
+      "path": "D:\\HSI_Baseline\\compare\\dynamic_router.py",
+      "sha256": "cdab521d55ee1a1d93adda93c107cb05f3f6a52fb3bc2fd8979db2f0626d9452"
+    },
+    "models/__init__.py": {
+      "path": "D:\\HSI_Baseline\\models\\__init__.py",
+      "sha256": "70fd7c87d791661b6e5feaaebc560df7798f0479f7cb213c50f4f4188bb44d6e"
+    }
+  },
+  "frozen_reference_sha256": "499b6e6f4629df2ac0b4d63c7bae310f90adfd2ae5cd8307272913e798566690",
+  "checkpoint_key_count": 106,
+  "strict_loading": {
+    "frozen_old": {
+      "strict": true,
+      "missing_keys": [],
+      "unexpected_keys": []
+    },
+    "new_gate_disabled": {
+      "strict": true,
+      "missing_keys": [],
+      "unexpected_keys": []
+    }
+  },
+  "synthetic_seed": 20261019,
+  "comparisons": [
+    {
+      "batch": 1,
+      "input_shape": [
+        1,
+        1,
+        15,
+        7,
+        7
+      ],
+      "output_shape": [
+        1,
+        22
+      ],
+      "max_abs_diff": 0.0,
+      "finite": true,
+      "allclose": true,
+      "eval": true
+    },
+    {
+      "batch": 2,
+      "input_shape": [
+        2,
+        1,
+        15,
+        7,
+        7
+      ],
+      "output_shape": [
+        2,
+        22
+      ],
+      "max_abs_diff": 0.0,
+      "finite": true,
+      "allclose": true,
+      "eval": true
+    }
+  ],
+  "model_state_unchanged_after_eval": true,
+  "sha256_after": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304",
+  "checkpoint_unchanged": true,
+  "exit_code": 0
+}

@@ -47,7 +47,10 @@ _MODEL_REGISTRY = {
 def build_model(model_name, in_channels, num_classes, patch_size=7,
                 spectral_groups=8, route_strength=0.5,
                 route_temperature=1.0, router_variant='full',
-                spatial_state_enabled=False, spatial_state_strength=0.5):
+                spatial_state_enabled=False, spatial_state_strength=0.5,
+                spatial_residual_gate=False):
+    if spatial_residual_gate and model_name != 'gscvit_dssr_spatial':
+        raise ValueError("spatial_residual_gate is supported only by gscvit_dssr_spatial")
     if model_name not in _MODEL_REGISTRY:
         raise ValueError(f"Unknown model '{model_name}'")
         
@@ -94,7 +97,8 @@ def build_model(model_name, in_channels, num_classes, patch_size=7,
                          route_temperature=route_temperature,
                          router_variant=router_variant,
                          spatial_state_enabled=spatial_state_enabled,
-                         spatial_state_strength=spatial_state_strength)
+                         spatial_state_strength=spatial_state_strength,
+                         spatial_residual_gate=spatial_residual_gate)
     elif model_name == 'spectralformer':      # [新增]
         return model_cls(in_channels, num_classes, patch_size)
     elif model_name == 'ssftt':               # [新增]

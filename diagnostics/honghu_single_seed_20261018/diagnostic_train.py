@@ -304,6 +304,7 @@ def build_run_config(
             "route_temperature": 1.0,
             "router_variant": "full",
             "spatial_state_strength": args.spatial_state_strength,
+            "spatial_residual_gate": getattr(args, "spatial_residual_gate", False),
         },
         "checkpoint_selection": "validation OA max; ties select later validation record; test sealed",
         "best_checkpoint": best_checkpoint,
@@ -384,7 +385,15 @@ def main():
         default=0.5,
         help="Spatial residual strength; default preserves the original 0.5 behavior.",
     )
+    parser.add_argument(
+        "--spatial-residual-gate",
+        action="store_true",
+        default=False,
+        help="Opt in to the serial model's spatial residual gate; disabled by default.",
+    )
     args = parser.parse_args()
+    if args.spatial_residual_gate and args.model_name != "gscvit_dssr_spatial":
+        parser.error("--spatial-residual-gate requires --model-name gscvit_dssr_spatial")
     root = Path(args.project_root).resolve()
     assets = Path(args.assets_dir).resolve()
     output = Path(args.output_dir).resolve()
@@ -428,6 +437,7 @@ def main():
         router_variant="full",
         spatial_state_enabled=spatial_enabled,
         spatial_state_strength=args.spatial_state_strength,
+        spatial_residual_gate=args.spatial_residual_gate,
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.005)
     scheduler = torch.optim.lr_scheduler.LambdaLR(

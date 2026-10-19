@@ -1,0 +1,44 @@
+{
+  "scope": "local_cpu_synthetic_correctness_only",
+  "task_status": "local_correctness_complete_pending_main_thread_review_no_training",
+  "actual_checkpoint_verification": "checkpoint_verification.json",
+  "training_authorized": false,
+  "defaults": {
+    "spatial_residual_gate": false,
+    "spatial_state_strength": 0.5
+  },
+  "synthetic_enabled_fixture": {
+    "model_name": "gscvit_dssr_spatial",
+    "spatial_residual_gate": true,
+    "spatial_state_enabled": true,
+    "spatial_state_strength": 0.5,
+    "in_channels": 15,
+    "num_classes": 22,
+    "patch_size": 7,
+    "batch_sizes": [1, 2],
+    "feature_shape": ["B", 64, 9, 9],
+    "beta_and_gate_shape": ["B", 1, 9, 9],
+    "gate_input_shape": ["B", 129, 9, 9],
+    "device": "cpu",
+    "dtype": "float32",
+    "atol": 1e-6,
+    "rtol": 1e-5
+  },
+  "formula": [
+    "R_spatial = F_spatial - F_spectral",
+    "gate_input = concat(F_spectral, R_spatial, beta, dim=1)",
+    "gate_logits = Conv2d(129, 1, kernel_size=1)(gate_input)",
+    "g = 2 * sigmoid(gate_logits)",
+    "F_out = F_spectral + g * R_spatial"
+  ],
+  "new_parameters": {
+    "spatial_residual_gate_conv.weight": [1, 129, 1, 1],
+    "spatial_residual_gate_conv.bias": [1]
+  },
+  "initialization": "weight=0, bias=0; g=1; numerical equivalence within declared tolerance",
+  "checkpoint_policy": "Off: old keys/shapes and strict loading preserved. On: old state misses the two declared gate tensors; no silent ignore. Verification explicitly adds zero gate tensors to an in-memory copy before strict loading.",
+  "factory_spatial_state_enabled_default": false,
+  "wrapper_spatial_state_enabled_default": true,
+  "default_note": "Both pre-existing spatial_state_enabled defaults are preserved. Gate opt-in does not implicitly enable spatial state.",
+  "future_cli_flag_prepared_only": "--spatial-residual-gate"
+}

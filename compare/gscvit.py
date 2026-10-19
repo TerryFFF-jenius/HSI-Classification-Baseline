@@ -500,7 +500,12 @@ class GSCViTSpatialWrapper(GSCViTWrapper):
 
 
 class GSCViTDSSRSpatialWrapper(GSCViTWrapper):
-    """TSSR -> spectral state -> spatial state -> original GSSA path."""
+    """Serial state route with an opt-in spatial residual gate before GSSA.
+
+    The gate adds 130 parameters only when explicitly enabled. Zero weights
+    and bias give g=1; subtract/add rounding allows numerical, not bitwise,
+    equivalence to the original spatial output.
+    """
 
     def __init__(
         self,
@@ -514,6 +519,7 @@ class GSCViTDSSRSpatialWrapper(GSCViTWrapper):
         spatial_state_strength=0.5,
         spatial_state_enabled=True,
         spectral_state_enabled=True,
+        spatial_residual_gate=False,
     ):
         super().__init__(in_channels, num_classes, patch_size)
         from compare.dynamic_router import (
@@ -542,11 +548,34 @@ class GSCViTDSSRSpatialWrapper(GSCViTWrapper):
             state_strength=spatial_state_strength,
             enabled=spatial_state_enabled,
         )
+        self.spatial_residual_gate = bool(spatial_residual_gate)
+        if self.spatial_residual_gate:
+            self.spatial_residual_gate_conv = nn.Conv2d(
+                2 * self.net.feature_dim + 1, 1, kernel_size=1,
+            )
+            nn.init.zeros_(self.spatial_residual_gate_conv.weight)
+            nn.init.zeros_(self.spatial_residual_gate_conv.bias)
+
+    def _gate_spatial_residual(self, spectral_features, spatial_features, beta):
+        """Apply the spatial gate to restored maps; beta is [B, 1, H, W]."""
+        if spectral_features.ndim != 4 or spatial_features.shape != spectral_features.shape:
+            raise ValueError("spectral and spatial features must have the same [B, C, H, W] shape")
+        expected_beta = (spectral_features.shape[0], 1, *spectral_features.shape[-2:])
+        if tuple(beta.shape) != expected_beta:
+            raise ValueError(f"gate beta must have shape {expected_beta}")
+        residual = spatial_features - spectral_features
+        gate_input = torch.cat((spectral_features, residual, beta), dim=1)
+        gate = 2.0 * torch.sigmoid(self.spatial_residual_gate_conv(gate_input))
+        return spectral_features + gate * residual
 
     def _route(self, features):
         routed, alpha, beta = self.dynamic_router.route(features)
         spectral_state_feat = self.state_router(routed, alpha, beta)
         spatial_state_feat = self.spatial_state_router(spectral_state_feat, beta)
+        if self.spatial_residual_gate:
+            spatial_state_feat = self._gate_spatial_residual(
+                spectral_state_feat, spatial_state_feat, beta,
+            )
         return spatial_state_feat, alpha, beta
 
     def _route_adapter(self, features):

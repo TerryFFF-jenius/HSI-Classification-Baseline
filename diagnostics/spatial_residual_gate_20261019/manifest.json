@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "audit_command": [
+    "C:\\Users\\PC\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "diagnostics\\spatial_residual_gate_20261019\\audit.py",
+    "after"
+  ],
+  "audit_exit_code": 0,
+  "inventory_exclusions": [
+    ".git",
+    "__pycache__",
+    ".idea",
+    ".vscode",
+    "diagnostics/spatial_residual_gate_20261019/"
+  ],
+  "git": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "f6cbfd03e965840e8838a7fbde46f1479cec3946\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exit_code": 0,
+      "stdout": "codex/spatial025-adaptation\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "stdout": " M .gitignore\n M compare/gscvit.py\n M diagnostics/honghu_single_seed_20261018/diagnostic_train.py\n M diagnostics/honghu_single_seed_20261018/feature_diagnosis.py\n M models/__init__.py\n?? HanChuan_Comparison_Table.csv\n?? HongHu_Comparison_Table.csv\n?? LongKou_Comparison_Table.csv\n?? PHASE6_SPATIAL_ROUTING.md\n?? _audit_multibatch_exec01.py\n?? _audit_multibatch_exec01/\n?? _make_unified_phase6_table.py\n?? _regenerate_evidence_manifest.py\n?? _verify_repacked_evidence.py\n?? \"cvit.py verify_dssr.py\"\n?? diagnostics/evidence_20261016_01/\n?? diagnostics/evidence_supplement_20261016_01/\n?? diagnostics/forward_backward_20261017/\n?? diagnostics/honghu_multibatch_residual_20261018/\n?? diagnostics/model_adaptation_effect_diagnosis_20261017/\n?? diagnostics/spatial_residual_gate_20261019/\n?? feature_diagnosis_multibatch_exec_02.tar.gz\n?? feature_diagnosis_multibatch_exec_02.tar.gz.sha256\n?? phase5_DSSR_OA_AA_Kappa_summary.csv\n?? verify_spatial_residual_gate.py\n?? x[0]\n",
+      "stderr": ""
+    }
+  ],
+  "changed_existing_files": [
+    "compare/gscvit.py",
+    "diagnostics/honghu_single_seed_20261018/diagnostic_train.py",
+    "models/__init__.py"
+  ],
+  "added_files_outside_dedicated_folder": [
+    "checkpoint_inputs/exec03_serial/checkpoint_epoch_192.pth",
+    "verify_spatial_residual_gate.py"
+  ],
+  "authorized_verification_inputs": {
+    "checkpoint_inputs/exec03_serial/checkpoint_epoch_192.pth": {
+      "size": 519156,
+      "sha256": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304",
+      "git_staging": "exclude",
+      "source": "/root/HSI_Baseline_honghu_diag_20261018/diagnostics/honghu_single_seed_20261018/runs_20261018_exec_03/gscvit_dssr_spatial/checkpoint_epoch_192.pth",
+      "authorization": "User supplied exact local path and SHA256 for read-only strict-load supplement."
+    }
+  },
+  "unexpected_modified_or_deleted": [],
+  "unexpected_added": [],
+  "protected_existing_files_verified": 3223,
+  "artifact_sha256": {
+    "compare/gscvit.py": "5deeca6bd8e30321369ed13a99cc21902839ecac910d669772044ad0c0e4e0e8",
+    "diagnostics/honghu_single_seed_20261018/diagnostic_train.py": "7dfa561cc4a815e5c344ff07b5ecfbaea729062cef5c1f64238fbc06c1682b80",
+    "models/__init__.py": "70fd7c87d791661b6e5feaaebc560df7798f0479f7cb213c50f4f4188bb44d6e",
+    "verify_spatial_residual_gate.py": "502624a9f11a9247f483f875831b7943213089edadb876b908241d4cf7fa6b37",
+    "diagnostics/spatial_residual_gate_20261019/audit.py": "9c674ad0942c352783f369f6c7307485273888c6cf41e9347c00f20831b055cc",
+    "diagnostics/spatial_residual_gate_20261019/before.json": "72b236af3af5034c106771499df6974109744f9e64e5307ad7f3b58dc20b8fe8",
+    "diagnostics/spatial_residual_gate_20261019/checkpoint_verification.json": "b192fa795b0a37a79c887cb35bd1ee4acb3d51abb1214eff3c96ed542c13f8fe",
+    "diagnostics/spatial_residual_gate_20261019/command_history.json": "e3bd4b9c0a413e3763b22f20d8e1d8e5af8039d567ee1999a1b5f2bbb4a168bd",
+    "diagnostics/spatial_residual_gate_20261019/commands.json": "8eee272d656631e99c15259b53134b056ccca9b2a1d3e1b7f2b9c51e304ec0e9",
+    "diagnostics/spatial_residual_gate_20261019/gate_config.json": "ae3969b2b12ba7c15c1687064b118b9dafbafcec97b8faa9471e9fcea0cbfa3e",
+    "diagnostics/spatial_residual_gate_20261019/README.md": "a916ce0659e186b85c470584d5127b9f4deba427be69b60bd11fd00ba13de860",
+    "diagnostics/spatial_residual_gate_20261019/reference_gscvit_before.py": "499b6e6f4629df2ac0b4d63c7bae310f90adfd2ae5cd8307272913e798566690",
+    "diagnostics/spatial_residual_gate_20261019/run_checks.py": "92c4403622ab25b1ac9f4f845ded29c302c87090bcc0310c85de2b57d6622159",
+    "diagnostics/spatial_residual_gate_20261019/verification.json": "d08d2a84b70fda16195364ea694164f77835494b183d8e6d6622469f5645cecf",
+    "diagnostics/spatial_residual_gate_20261019/verify_checkpoint.py": "1928e2cc3c84ee504d2e00e5e5967c6e4cc7f3f9532c804a84401a32176d5430"
+  },
+  "source_sha256": {
+    "compare/gscvit.py": "5deeca6bd8e30321369ed13a99cc21902839ecac910d669772044ad0c0e4e0e8",
+    "compare/dynamic_router.py": "cdab521d55ee1a1d93adda93c107cb05f3f6a52fb3bc2fd8979db2f0626d9452",
+    "models/__init__.py": "70fd7c87d791661b6e5feaaebc560df7798f0479f7cb213c50f4f4188bb44d6e"
+  },
+  "manifest_self_hash": "Excluded to avoid self-reference; hash externally if needed."
+}
