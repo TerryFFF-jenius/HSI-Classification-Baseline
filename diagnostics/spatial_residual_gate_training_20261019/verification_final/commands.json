@@ -1,0 +1,90 @@
+[
+  {
+    "actual_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "-B",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\synthetic_checks.py",
+      "--device",
+      "cpu",
+      "--output-dir",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "{\"status\": \"passed\", \"device\": \"cpu\", \"cases\": [{\"batch\": 1, \"max_abs_logits_difference\": 1.6987323760986328e-06, \"loss_on\": 3.171915054321289}, {\"batch\": 2, \"max_abs_logits_difference\": 5.364418029785156e-07, \"loss_on\": 3.7279207706451416}], \"report\": \"D:\\\\HSI_Baseline\\\\diagnostics\\\\spatial_residual_gate_training_20261019\\\\verification_final\\\\synthetic_cpu\\\\synthetic_report.json\"}\n",
+    "stderr": ""
+  },
+  {
+    "actual_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "-B",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+      "--project-root",
+      "D:\\HSI_Baseline",
+      "--assets-dir",
+      "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+      "--output-dir",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\unused_future_target",
+      "--expected-commit",
+      "d8962e0b2f2f3281878f08fb4906b075101ec713",
+      "--report",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\preflight_local.json"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "{\"status\": \"prepared_not_executed\", \"training_authorized\": false, \"head\": \"d8962e0b2f2f3281878f08fb4906b075101ec713\", \"worktree_clean\": false, \"asset_count\": 7, \"report\": \"D:\\\\HSI_Baseline\\\\diagnostics\\\\spatial_residual_gate_training_20261019\\\\verification_final\\\\preflight_local.json\", \"output_created\": false, \"training_started\": false}\n",
+    "stderr": ""
+  },
+  {
+    "actual_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "-B",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+      "--project-root",
+      "D:\\HSI_Baseline",
+      "--assets-dir",
+      "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+      "--output-dir",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu",
+      "--expected-commit",
+      "d8962e0b2f2f3281878f08fb4906b075101ec713"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 84, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 28, in main\n    report = runtime.preflight(trainer, args.project_root, args.assets_dir, args.output_dir, args.expected_commit)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 104, in preflight\n    output = assert_empty_output(output, assets)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 36, in assert_empty_output\n    raise FileExistsError('Refusing non-empty output; preserve failed runs: ' + str(path))\nFileExistsError: Refusing non-empty output; preserve failed runs: D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu\n"
+  },
+  {
+    "actual_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "-B",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+      "--project-root",
+      "D:\\HSI_Baseline",
+      "--assets-dir",
+      "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+      "--output-dir",
+      "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\unused_future_target",
+      "--expected-commit",
+      "0000000000000000000000000000000000000000"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 84, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 28, in main\n    report = runtime.preflight(trainer, args.project_root, args.assets_dir, args.output_dir, args.expected_commit)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 107, in preflight\n    raise ValueError('Actual commit differs from user-confirmed commit')\nValueError: Actual commit differs from user-confirmed commit\n"
+  },
+  {
+    "actual_command": [
+      "git",
+      "--no-optional-locks",
+      "diff",
+      "--check",
+      "--",
+      "diagnostics/honghu_single_seed_20261018/diagnostic_train.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'diagnostics/honghu_single_seed_20261018/diagnostic_train.py', LF will be replaced by CRLF the next time Git touches it\n"
+  }
+]

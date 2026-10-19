@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "training_authorized": false,
+  "actual_command": [
+    "C:\\Users\\PC\\Anaconda3\\python.exe",
+    "diagnostics\\spatial_residual_gate_training_20261019\\verify_delivery.py"
+  ],
+  "initial_finalize_command": [
+    "C:\\Users\\PC\\Anaconda3\\python.exe",
+    "-B",
+    "diagnostics/spatial_residual_gate_training_20261019/finalize_delivery.py"
+  ],
+  "initial_finalize_exit_code": 1,
+  "reason": "Attempted JSON parsing of deliberately invalid FAKE_BYTES_NOT_DATA split_manifest byte fixture; not a model/preflight failure",
+  "fix": "Exclude explicitly labelled arbitrary-byte fixtures from JSON parse checks; keep them hash-inventoried",
+  "real_final_evidence_json_parsed": [
+    "verification_final\\boundary_report.json",
+    "verification_final\\commands.json",
+    "verification_final\\preflight_local.json",
+    "verification_final\\synthetic_cpu\\synthetic_report.json",
+    "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_candidate_config.json",
+    "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_comparison_cases.json",
+    "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_reference_config.json",
+    "verification_final\\synthetic_cpu\\fixtures\\synthetic_logging\\train_config.json"
+  ],
+  "intentional_non_json_fixture_paths": [
+    "verification_final\\synthetic_cpu\\fixtures\\FAKE_BYTES_NOT_DATA\\file_manifest.json",
+    "verification_final\\synthetic_cpu\\fixtures\\FAKE_BYTES_NOT_DATA\\split_manifest.json"
+  ],
+  "runtime_hashes_unchanged": true,
+  "protected_file_count": 30,
+  "head": "d8962e0b2f2f3281878f08fb4906b075101ec713",
+  "git_status_short": [
+    " M .gitignore",
+    " M diagnostics/honghu_single_seed_20261018/diagnostic_train.py",
+    " M diagnostics/honghu_single_seed_20261018/feature_diagnosis.py",
+    "?? HanChuan_Comparison_Table.csv",
+    "?? HongHu_Comparison_Table.csv",
+    "?? LongKou_Comparison_Table.csv",
+    "?? PHASE6_SPATIAL_ROUTING.md",
+    "?? _audit_multibatch_exec01.py",
+    "?? _audit_multibatch_exec01/",
+    "?? _make_unified_phase6_table.py",
+    "?? _regenerate_evidence_manifest.py",
+    "?? _verify_repacked_evidence.py",
+    "?? \"cvit.py verify_dssr.py\"",
+    "?? diagnostics/evidence_20261016_01/",
+    "?? diagnostics/evidence_supplement_20261016_01/",
+    "?? diagnostics/forward_backward_20261017/",
+    "?? diagnostics/honghu_multibatch_residual_20261018/",
+    "?? diagnostics/model_adaptation_effect_diagnosis_20261017/",
+    "?? diagnostics/spatial_residual_gate_training_20261019/",
+    "?? feature_diagnosis_multibatch_exec_02.tar.gz",
+    "?? feature_diagnosis_multibatch_exec_02.tar.gz.sha256",
+    "?? phase5_DSSR_OA_AA_Kappa_summary.csv",
+    "?? x[0]"
+  ],
+  "git_diff_check_exit_code": 0,
+  "no_model_execution_in_packaging": true
+}

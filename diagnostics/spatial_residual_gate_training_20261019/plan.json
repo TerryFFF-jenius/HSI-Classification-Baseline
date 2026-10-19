@@ -1,0 +1,57 @@
+{
+  "task": "gate 单模型训练方案与运行准备",
+  "training_authorized": false,
+  "status": "prepared_not_executed",
+  "budget": {"candidate_runs": 1, "epochs_per_run": 200, "total_epochs": 200, "baseline_retraining": 0},
+  "model_name": "gscvit_dssr_spatial",
+  "dataset": "HongHu",
+  "training_seed": 20261017,
+  "split_seed": 20261018,
+  "input_shape": ["B", 1, 15, 7, 7],
+  "num_classes": 22,
+  "patch_size": 7,
+  "spatial_state_enabled": true,
+  "config": {
+    "epochs": 200, "batch_size": 32, "optimizer": "adamw",
+    "learning_rate": 0.0003, "weight_decay": 0.005,
+    "scheduler": "poly", "lr_decay": 0.95,
+    "train_ratio": 0.01, "val_ratio": 0.01,
+    "spectral_groups": 8, "route_strength": 0.5, "route_temperature": 1.0,
+    "router_variant": "full", "spatial_state_strength": 0.5, "spatial_residual_gate": true
+  },
+  "scheduler_actual": "LambdaLR(lambda epoch: 0.95 ** ((epoch - 1) / 10 + 1)); scheduler.step after each epoch",
+  "initialization": "random initialization; isolated gate-off reference RNG alignment; no checkpoint warm-start",
+  "gate_formula": "Fs=spectral state output; Fp=existing spatial state output; R=Fp-Fs; g=2*sigmoid(Conv2d(129,1,1)(concat(Fs,R,beta))); Fout=Fs+g*R",
+  "gate_added_parameters": 130,
+  "gate_initial_value": 1,
+  "pca": {"components": 15, "whiten": true, "random_state": 20261017, "fit_scope": "full_scene_before_patch_creation_and_split", "reuse_only": true, "transductive_limitation": "All scene features participated in existing PCA. Test labels/metrics remain sealed."},
+  "dataloader": {"train_shuffle": true, "dedicated_generator_seed": 20261017, "validation_shuffle": false, "num_workers": 0, "drop_last": false, "pin_memory": false, "sample_order": "existing row-major sample_index_map and split indices unchanged"},
+  "validation": {"frequency_epochs": 2, "records": 100, "primary_metric": "OA", "checkpoint_rule": "maximum validation OA, >= selects later record", "early_stopping": false},
+  "asset_anchors": {
+    "file_manifest.json": "7532fddd36e885dd65cbaa83bfca329079064c630839928e9a4fcc930a776332",
+    "split_manifest.json": "58c0110e1e80eafcd7db8a8bdc02486b811774df348a19fc2159cdf61a6f4eef",
+    "sample_index_map.npz": "7e837bdfc39e98c73596ffd40f2ccf712037ea022dea929e802d6de7364424e1"
+  },
+  "known_future_autodl_assets": "/root/HSI_Baseline_honghu_diag_20261018/diagnostics/honghu_single_seed_20261018/assets",
+  "reference": {
+    "run": "exec_03", "model_name": "gscvit_dssr_spatial", "spatial_residual_gate": false, "spatial_state_strength": 0.5,
+    "directory": "/root/HSI_Baseline_honghu_diag_20261018/diagnostics/honghu_single_seed_20261018/runs_20261018_exec_03/gscvit_dssr_spatial/",
+    "checkpoint": "checkpoint_epoch_192.pth",
+    "sha256": "606ef81f050cda8171dd0effe05f77ef6a24c12289942f5e076f253cf0183304",
+    "validation": {"oa": 95.1383501422, "aa": 89.1850859033, "kappa": 93.8338075617},
+    "source": "accepted user-provided reference; full AutoDL train_config not read in this preparation"
+  },
+  "decision_rules": {
+    "oa_less_or_equal": "No OA benefit shown in this screening; stop. Report AA/Kappa without reframing the primary hypothesis.",
+    "oa_greater": "Single-seed validation exploratory candidate only; report AA/Kappa, numerical health and limitations; no causal, cross-seed or formal performance claim.",
+    "no_posthoc_threshold": true,
+    "no_automatic_followup": "No seed/strength/structure sweep, test evaluation, extra training or general State Fusion",
+    "gate_weights_nonzero": "Does not establish effective sample/location adaptation"
+  },
+  "extra_real_data_forward_budget": 0,
+  "gate_distribution_collection": "Not proposed or enabled. Future analysis needs separate reviewed scope and forward budget.",
+  "cuda_status": "not_verified_locally",
+  "future_synced_commit": null,
+  "autodl_accessed": false,
+  "stop_conditions": ["missing explicit future approval", "asset/config/code/commit mismatch", "non-empty output", "nonfinite output/loss/gradient/parameters/metrics", "initialization or RNG mismatch", "missing full comparison records"]
+}

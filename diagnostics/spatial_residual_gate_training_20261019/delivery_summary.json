@@ -1,0 +1,327 @@
+{
+  "task_status": "准备完成待主线程批准",
+  "status": "prepared_not_executed",
+  "training_authorized": false,
+  "evidence_directory": "verification_final",
+  "head": "d8962e0b2f2f3281878f08fb4906b075101ec713",
+  "branch": "codex/spatial025-adaptation",
+  "worktree_clean": false,
+  "remote_verified": false,
+  "future_commit": null,
+  "autodl_ready_claimed": false,
+  "budget": {
+    "candidate_runs": 1,
+    "epochs_per_run": 200,
+    "total_epochs": 200,
+    "baseline_retraining": 0
+  },
+  "protected_files_unchanged": 30,
+  "default_regression": {
+    "all_original_functions_ast_equal_after_removing_gate_only_additions": true,
+    "original_function_count": 11,
+    "optimizer_scheduler_loss_dataloader_checkpoint_logic_unchanged": true
+  },
+  "default_train_outputs": [
+    {
+      "batch": 1,
+      "max_abs_difference": 0.0,
+      "buffers_exact": true,
+      "rng_exact": true
+    },
+    {
+      "batch": 2,
+      "max_abs_difference": 0.0,
+      "buffers_exact": true,
+      "rng_exact": true
+    }
+  ],
+  "alignment": {
+    "method": "isolated_gate_off_reference_from_same_preconstruction_rng_restore_reference_poststate_v1",
+    "shared_state_exact": true,
+    "shared_initial_state": {
+      "tensor_count": 106,
+      "numel": 119559,
+      "sha256": "4c12321fa04bdb6afe27936cf23fd8a80f64dd813efc456a8a5bf4dfaa174bcb"
+    },
+    "gate": {
+      "spatial_residual_gate_conv.bias": {
+        "shape": [
+          1
+        ],
+        "numel": 1,
+        "all_zero": true
+      },
+      "spatial_residual_gate_conv.weight": {
+        "shape": [
+          1,
+          129,
+          1,
+          1
+        ],
+        "numel": 129,
+        "all_zero": true
+      }
+    },
+    "rng_before": {
+      "python": "ed1a5400af8ba1385f0d805bced04ead957f19e4a1aedf089fd79517f2ca8e39",
+      "numpy": "c329a07d17aef97d22c0309e006e4920a2f2d250288d4cd03dd7136849e14eaf",
+      "cpu": "01fdf932beee6ce6cbf97de7334d1eb77d355fa6e66faf7b4656a4edfd823323",
+      "cuda": null
+    },
+    "reference_rng_after": {
+      "python": "ed1a5400af8ba1385f0d805bced04ead957f19e4a1aedf089fd79517f2ca8e39",
+      "numpy": "c329a07d17aef97d22c0309e006e4920a2f2d250288d4cd03dd7136849e14eaf",
+      "cpu": "8f95138471625078247dbf43c3ec48ae3693041e903719701162ab747fe84566",
+      "cuda": null
+    },
+    "raw_gate_rng_after": {
+      "python": "ed1a5400af8ba1385f0d805bced04ead957f19e4a1aedf089fd79517f2ca8e39",
+      "numpy": "c329a07d17aef97d22c0309e006e4920a2f2d250288d4cd03dd7136849e14eaf",
+      "cpu": "98344d2c7f0813680bfc239dcb6256ab6fdd3de5a7d73aee1c0e945336bb7200",
+      "cuda": null
+    },
+    "aligned_rng_after": {
+      "python": "ed1a5400af8ba1385f0d805bced04ead957f19e4a1aedf089fd79517f2ca8e39",
+      "numpy": "c329a07d17aef97d22c0309e006e4920a2f2d250288d4cd03dd7136849e14eaf",
+      "cpu": "8f95138471625078247dbf43c3ec48ae3693041e903719701162ab747fe84566",
+      "cuda": null
+    },
+    "cpu_rng_exact": true,
+    "initialized_cuda_rng_exact": null,
+    "python_numpy_unchanged": true,
+    "loader_generator_unchanged": true,
+    "trained_checkpoint_loaded": false,
+    "reference_forward_executed": false
+  },
+  "synthetic_order_exact": true,
+  "synthetic_cases": [
+    {
+      "batch": 1,
+      "max_abs_logits_difference": 1.6987323760986328e-06,
+      "max_fraction_of_allowed_error": 0.8443796634674072,
+      "loss_off": 3.17191481590271,
+      "loss_on": 3.171915054321289,
+      "parameters_exactly_unchanged": true,
+      "all_parameter_gradients_finite": true,
+      "optimizer_membership": {
+        "all_parameters_exactly_once": true,
+        "gate_parameters_exactly_once": true,
+        "parameter_tensors": 90,
+        "groups": 1,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.005,
+        "optimizer_step_called": false
+      }
+    },
+    {
+      "batch": 2,
+      "max_abs_logits_difference": 5.364418029785156e-07,
+      "max_fraction_of_allowed_error": 0.1546984165906906,
+      "loss_off": 3.7279205322265625,
+      "loss_on": 3.7279207706451416,
+      "parameters_exactly_unchanged": true,
+      "all_parameter_gradients_finite": true,
+      "optimizer_membership": {
+        "all_parameters_exactly_once": true,
+        "gate_parameters_exactly_once": true,
+        "parameter_tensors": 90,
+        "groups": 1,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.005,
+        "optimizer_step_called": false
+      }
+    }
+  ],
+  "fixtures": {
+    "hash_fixture_passed": true,
+    "tamper_rejected": true,
+    "nonempty_output_rejected": true,
+    "empty_output_not_created": true,
+    "inert_approval_rejected": true,
+    "comparison_cases": [
+      "decrease",
+      "tie",
+      "increase"
+    ],
+    "partial_history_rejected": true,
+    "real_autodl_config_read": false,
+    "later_checkpoint_tie_rule": true,
+    "incorrect_tie_rejected": true,
+    "fixtures_not_accepted_as_real": true,
+    "direct_training_guard_rejected": true,
+    "two_epoch_records_persisted_without_training": true,
+    "nonfinite_hook_recorded_and_raised_without_step": true,
+    "nonfinite_accumulated_loss_recorded_and_rejected": true
+  },
+  "cuda_verified": false,
+  "real_data_forward_calls": 0,
+  "optimizer_step_calls": 0,
+  "training_loop_entered": false,
+  "test_evaluated": false,
+  "assets_verified_count": 7,
+  "exact_local_reference_config_exists": false,
+  "full_reference_config_read": false,
+  "actual_commands": [
+    {
+      "actual_command": [
+        "C:\\Users\\PC\\Anaconda3\\python.exe",
+        "-B",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\synthetic_checks.py",
+        "--device",
+        "cpu",
+        "--output-dir",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "{\"status\": \"passed\", \"device\": \"cpu\", \"cases\": [{\"batch\": 1, \"max_abs_logits_difference\": 1.6987323760986328e-06, \"loss_on\": 3.171915054321289}, {\"batch\": 2, \"max_abs_logits_difference\": 5.364418029785156e-07, \"loss_on\": 3.7279207706451416}], \"report\": \"D:\\\\HSI_Baseline\\\\diagnostics\\\\spatial_residual_gate_training_20261019\\\\verification_final\\\\synthetic_cpu\\\\synthetic_report.json\"}\n",
+      "stderr": ""
+    },
+    {
+      "actual_command": [
+        "C:\\Users\\PC\\Anaconda3\\python.exe",
+        "-B",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+        "--project-root",
+        "D:\\HSI_Baseline",
+        "--assets-dir",
+        "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+        "--output-dir",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\unused_future_target",
+        "--expected-commit",
+        "d8962e0b2f2f3281878f08fb4906b075101ec713",
+        "--report",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\preflight_local.json"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "{\"status\": \"prepared_not_executed\", \"training_authorized\": false, \"head\": \"d8962e0b2f2f3281878f08fb4906b075101ec713\", \"worktree_clean\": false, \"asset_count\": 7, \"report\": \"D:\\\\HSI_Baseline\\\\diagnostics\\\\spatial_residual_gate_training_20261019\\\\verification_final\\\\preflight_local.json\", \"output_created\": false, \"training_started\": false}\n",
+      "stderr": ""
+    },
+    {
+      "actual_command": [
+        "C:\\Users\\PC\\Anaconda3\\python.exe",
+        "-B",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+        "--project-root",
+        "D:\\HSI_Baseline",
+        "--assets-dir",
+        "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+        "--output-dir",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu",
+        "--expected-commit",
+        "d8962e0b2f2f3281878f08fb4906b075101ec713"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 84, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 28, in main\n    report = runtime.preflight(trainer, args.project_root, args.assets_dir, args.output_dir, args.expected_commit)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 104, in preflight\n    output = assert_empty_output(output, assets)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 36, in assert_empty_output\n    raise FileExistsError('Refusing non-empty output; preserve failed runs: ' + str(path))\nFileExistsError: Refusing non-empty output; preserve failed runs: D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\synthetic_cpu\n"
+    },
+    {
+      "actual_command": [
+        "C:\\Users\\PC\\Anaconda3\\python.exe",
+        "-B",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py",
+        "--project-root",
+        "D:\\HSI_Baseline",
+        "--assets-dir",
+        "D:\\HSI_Baseline\\diagnostics\\honghu_single_seed_20261018\\assets",
+        "--output-dir",
+        "D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\verification_final\\unused_future_target",
+        "--expected-commit",
+        "0000000000000000000000000000000000000000"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 84, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\launch.py\", line 28, in main\n    report = runtime.preflight(trainer, args.project_root, args.assets_dir, args.output_dir, args.expected_commit)\n  File \"D:\\HSI_Baseline\\diagnostics\\spatial_residual_gate_training_20261019\\runtime.py\", line 107, in preflight\n    raise ValueError('Actual commit differs from user-confirmed commit')\nValueError: Actual commit differs from user-confirmed commit\n"
+    },
+    {
+      "actual_command": [
+        "git",
+        "--no-optional-locks",
+        "diff",
+        "--check",
+        "--",
+        "diagnostics/honghu_single_seed_20261018/diagnostic_train.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'diagnostics/honghu_single_seed_20261018/diagnostic_train.py', LF will be replaced by CRLF the next time Git touches it\n"
+    }
+  ],
+  "trainer_before_sha256": "7dfa561cc4a815e5c344ff07b5ecfbaea729062cef5c1f64238fbc06c1682b80",
+  "trainer_after_sha256": "6611a31b751a1d6dac495daf0dec5d5eb8e6ad0390c3ae8477d748143f88b245",
+  "actual_finalize_command": [
+    "C:\\Users\\PC\\Anaconda3\\python.exe",
+    "diagnostics\\spatial_residual_gate_training_20261019\\finalize_delivery.py"
+  ],
+  "prior_evidence": {
+    "checks_cpu_01": "numerical check passed; JSON newline serializer defect; superseded, raw files retained",
+    "preflight_local_01.json": "hash checks passed; JSON newline serializer defect; superseded, raw file retained",
+    "verification_02": "passed, before direct RNG equality and additional regression checks",
+    "verification_03": "passed, before accumulated-loss check and device identity extension"
+  },
+  "future_execution": "User must review, commit/synchronize, verify CUDA and identity, then provide explicit separate approval. No execution in this task.",
+  "packaging_check": {
+    "status": "passed",
+    "training_authorized": false,
+    "actual_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "diagnostics\\spatial_residual_gate_training_20261019\\verify_delivery.py"
+    ],
+    "initial_finalize_command": [
+      "C:\\Users\\PC\\Anaconda3\\python.exe",
+      "-B",
+      "diagnostics/spatial_residual_gate_training_20261019/finalize_delivery.py"
+    ],
+    "initial_finalize_exit_code": 1,
+    "reason": "Attempted JSON parsing of deliberately invalid FAKE_BYTES_NOT_DATA split_manifest byte fixture; not a model/preflight failure",
+    "fix": "Exclude explicitly labelled arbitrary-byte fixtures from JSON parse checks; keep them hash-inventoried",
+    "real_final_evidence_json_parsed": [
+      "verification_final\\boundary_report.json",
+      "verification_final\\commands.json",
+      "verification_final\\preflight_local.json",
+      "verification_final\\synthetic_cpu\\synthetic_report.json",
+      "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_candidate_config.json",
+      "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_comparison_cases.json",
+      "verification_final\\synthetic_cpu\\fixtures\\SYNTHETIC_reference_config.json",
+      "verification_final\\synthetic_cpu\\fixtures\\synthetic_logging\\train_config.json"
+    ],
+    "intentional_non_json_fixture_paths": [
+      "verification_final\\synthetic_cpu\\fixtures\\FAKE_BYTES_NOT_DATA\\file_manifest.json",
+      "verification_final\\synthetic_cpu\\fixtures\\FAKE_BYTES_NOT_DATA\\split_manifest.json"
+    ],
+    "runtime_hashes_unchanged": true,
+    "protected_file_count": 30,
+    "head": "d8962e0b2f2f3281878f08fb4906b075101ec713",
+    "git_status_short": [
+      " M .gitignore",
+      " M diagnostics/honghu_single_seed_20261018/diagnostic_train.py",
+      " M diagnostics/honghu_single_seed_20261018/feature_diagnosis.py",
+      "?? HanChuan_Comparison_Table.csv",
+      "?? HongHu_Comparison_Table.csv",
+      "?? LongKou_Comparison_Table.csv",
+      "?? PHASE6_SPATIAL_ROUTING.md",
+      "?? _audit_multibatch_exec01.py",
+      "?? _audit_multibatch_exec01/",
+      "?? _make_unified_phase6_table.py",
+      "?? _regenerate_evidence_manifest.py",
+      "?? _verify_repacked_evidence.py",
+      "?? \"cvit.py verify_dssr.py\"",
+      "?? diagnostics/evidence_20261016_01/",
+      "?? diagnostics/evidence_supplement_20261016_01/",
+      "?? diagnostics/forward_backward_20261017/",
+      "?? diagnostics/honghu_multibatch_residual_20261018/",
+      "?? diagnostics/model_adaptation_effect_diagnosis_20261017/",
+      "?? diagnostics/spatial_residual_gate_training_20261019/",
+      "?? feature_diagnosis_multibatch_exec_02.tar.gz",
+      "?? feature_diagnosis_multibatch_exec_02.tar.gz.sha256",
+      "?? phase5_DSSR_OA_AA_Kappa_summary.csv",
+      "?? x[0]"
+    ],
+    "git_diff_check_exit_code": 0,
+    "no_model_execution_in_packaging": true
+  }
+}

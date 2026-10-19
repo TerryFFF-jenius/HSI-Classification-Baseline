@@ -328,6 +328,16 @@ def build_run_config(
     else:
         run_config["best_checkpoint_path"] = None
         run_config["best_checkpoint_sha256"] = None
+    if getattr(args, "spatial_residual_gate", False):
+        run_config["gate_preparation"] = args.gate_context
+        run_config["initialization_alignment"] = args.gate_initialization
+        run_config["optimizer_membership"] = args.gate_optimizer_membership
+        run_config["scheduler_actual"] = "LambdaLR(lambda epoch: 0.95 ** ((epoch - 1) / 10 + 1))"
+        run_config["training_authorized"] = True
+        validations = [r for r in history if "validation" in r]
+        selected = max(validations, key=lambda r: (r["validation"]["oa"], r["epoch"])) if validations else None
+        run_config["selected_epoch"] = selected["epoch"] if selected else None
+        run_config["selected_validation"] = selected["validation"] if selected else None
     return run_config
 
 
@@ -391,15 +401,22 @@ def main():
         default=False,
         help="Opt in to the serial model's spatial residual gate; disabled by default.",
     )
+    parser.add_argument("--gate-approval", default=None, help="Reviewed gate-only approval; use launch.py.")
+    parser.add_argument("--gate-launch-id", default=None, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.spatial_residual_gate and args.model_name != "gscvit_dssr_spatial":
         parser.error("--spatial-residual-gate requires --model-name gscvit_dssr_spatial")
     root = Path(args.project_root).resolve()
     assets = Path(args.assets_dir).resolve()
     output = Path(args.output_dir).resolve()
+    if args.spatial_residual_gate:
+        from diagnostics.spatial_residual_gate_training_20261019 import runtime as gate_runtime
+        args.gate_context = gate_runtime.guard_training(sys.modules[__name__], args)
     if output.exists() and any(output.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty output directory: {output}")
     output.mkdir(parents=True, exist_ok=True)
+    if args.spatial_residual_gate:
+        gate_runtime.start_record(output, args.gate_context, [sys.executable, *sys.argv])
     validate_asset_identity(assets)
     manifest = json.loads((assets / "split_manifest.json").read_text(encoding="utf-8"))
     if manifest["diagnostic_id"] != "honghu_single_seed_20261018":
@@ -426,7 +443,17 @@ def main():
     )
     val_loader = DataLoader(TensorDataset(val_x, val_y), batch_size=32, shuffle=False, num_workers=0)
 
-    model = build_model(
+    model_factory = build_model
+    if args.spatial_residual_gate:
+        from diagnostics.spatial_residual_gate_training_20261019.alignment import build_aligned, optimizer_membership
+
+        def model_factory(*positional, **options):
+            aligned, args.gate_initialization = build_aligned(
+                build_model, *positional, generator=generator, **options
+            )
+            return aligned
+
+    model = model_factory(
         args.model_name,
         15,
         22,
@@ -440,6 +467,8 @@ def main():
         spatial_residual_gate=args.spatial_residual_gate,
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.005)
+    if args.spatial_residual_gate:
+        args.gate_optimizer_membership = optimizer_membership(model, optimizer)
     scheduler = torch.optim.lr_scheduler.LambdaLR(
         optimizer, lambda epoch: 0.95 ** ((epoch - 1) / 10 + 1)
     )
@@ -466,6 +495,8 @@ def main():
             "runtime source identity invalid; training not started; see train_config.json: "
             + ", ".join(invalid_sources)
         )
+    if args.spatial_residual_gate:
+        gate_runtime.install_health_hook(optimizer, model, output, run_config, write_run_config)
     for epoch in range(1, 201):
         model.train()
         train_loss = 0.0
@@ -547,6 +578,10 @@ def main():
             else:
                 record["checkpoint_saved"] = False
         history.append(record)
+        if args.spatial_residual_gate:
+            gate_runtime.record_epoch(
+                output, record, run_config, best_checkpoint, time.monotonic() - start_time, write_run_config
+            )
     run_config = build_run_config(
         manifest,
         args,

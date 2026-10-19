@@ -1,0 +1,325 @@
+{
+  "scope": "new delivery directory plus sole modified trainer; excludes this manifest itself",
+  "files": {
+    "diagnostics/honghu_single_seed_20261018/diagnostic_train.py": {
+      "sha256": "6611a31b751a1d6dac495daf0dec5d5eb8e6ad0390c3ae8477d748143f88b245",
+      "bytes": 25670
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/alignment.py": {
+      "sha256": "042146dd3107657deda5f905a46ac87b407e78fd93e66f04c55765e374a5f248",
+      "bytes": 6398
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/approval_template.json": {
+      "sha256": "8877f22b8a8ba39ad70aa155d6aa773b1a3d95feb4443f265deb9a558ce630c6",
+      "bytes": 588
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/baseline.json": {
+      "sha256": "ed71025e541fbdd806547455467c9cb2a9e36cafe356014ca34869da241ab5ba",
+      "bytes": 126308
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/capture_baseline.py": {
+      "sha256": "21dc024ee23f695b872be7a0a5f650e68483bd848b605ffa3db927f0eae3316e",
+      "bytes": 2442
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/file_manifest.json": {
+      "sha256": "5be7b36f2a42a6d4e7b1eb7fa2fcd3097e17ca1bf1380098b8f2a5ab5bd5ba5c",
+      "bytes": 801
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/pca_scene.npz": {
+      "sha256": "1ccd7ff1e6db4bb4f7e5098d04f036da4317fb703d68fa1f3f2509f732ea81b1",
+      "bytes": 16
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/pca_transform.npz": {
+      "sha256": "6db40626b659ed5e2a55d9267d21d717c25828d4fe7effb44bde8a0f47b3076d",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/sample_index_map.npz": {
+      "sha256": "78052a157dcea8f541d76fe9e4b2b87c600f7c18015bfcec00f22817e24ad9a9",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/split_indices.npz": {
+      "sha256": "dfed409cc02c77d54581b241071855da0f7c9e47b9e7b7fb06be013ed682eecc",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/split_manifest.json": {
+      "sha256": "1591de26739cd20f497f85fa67f366a25b39578cbc76932b2cae4d9da9df1390",
+      "bytes": 48
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/FAKE_BYTES_NOT_DATA/validation_batch.npz": {
+      "sha256": "25d1b7e62d56f22ae520a4abcaf686c9aed99ca03150665166b672058f8265e0",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/SYNTHETIC_candidate_config.json": {
+      "sha256": "a5934e3dab4932d3519f06f80648f8343663ae37c289f88daae3e6e522607c60",
+      "bytes": 51773
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/SYNTHETIC_comparison_cases.json": {
+      "sha256": "60783d1324c1ea4e028e6318c4964ea622cf627df03f506350e1228489d8f8b8",
+      "bytes": 4512
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/fixtures/SYNTHETIC_reference_config.json": {
+      "sha256": "e363c7458ddc29cd71da0a6855e076ae61ecf857054c8699d636661b2e091b68",
+      "bytes": 51370
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/checks_cpu_01/synthetic_report.json": {
+      "sha256": "778fcd7937038d3006f0e879b4c7565c84bec2a06698edff5d2be57e4e1a2b3c",
+      "bytes": 159933
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/compare_runs.py": {
+      "sha256": "f32d44af2cef37aa69a5dc88704627dc64ab322fb53403b3569844939908b31e",
+      "bytes": 8130
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/delivery_summary.json": {
+      "sha256": "77cd586492a294cc6eb29a696fce632c029d3b43302f7259def2d4532cddb40a",
+      "bytes": 15157
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/diagnostic_train_before.txt": {
+      "sha256": "7dfa561cc4a815e5c344ff07b5ecfbaea729062cef5c1f64238fbc06c1682b80",
+      "bytes": 23519
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/FINAL_REPORT.md": {
+      "sha256": "6fb816db271326fded2c03e49738d6aeafb081421913d13df4a2a9018d94decb",
+      "bytes": 13969
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/finalize_delivery.py": {
+      "sha256": "13440ffdd81aa316f101f4796bf61559d50d4a46fc3ac83070bb21a017e75cfd",
+      "bytes": 15938
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/launch.py": {
+      "sha256": "0261f7dd4cfcfdac0980f5260b59df3862edcaa1f75ff5bc0ad5665ecb20a624",
+      "bytes": 4740
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/packaging_checks.json": {
+      "sha256": "ac68f9c1797955700f3d26a55e56d0071fdca90b090df88606444cb6c32d74aa",
+      "bytes": 2828
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/plan.json": {
+      "sha256": "bc6198e8fc367976e2461c95b7f05a7d165918075b71409a6189e9dc23236c57",
+      "bytes": 4084
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/preflight_local_01.json": {
+      "sha256": "b0075f11e704c14f285853e15643c6d2e2a1de9b84dea366bc6578311ee6670a",
+      "bytes": 148082
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/README.md": {
+      "sha256": "f89ee412468f2257e8b82e99e878313a9f95b5773a78e8f87ee24eb614f73962",
+      "bytes": 10755
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/run_local_checks.py": {
+      "sha256": "706e350c6685759bd5b29dc28a50318e780a2e8e76096346baf249a2755a9500",
+      "bytes": 5419
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/runtime.py": {
+      "sha256": "e58acf839e715460bf3450637be66b4fdac50a4595aca453ea3781fb7151c041",
+      "bytes": 11659
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/STAGING_PATHS.txt": {
+      "sha256": "26eb7679e0943e8b7348e4b84d53ba4e7630726e01aba3c2c73fe99adae48065",
+      "bytes": 1850
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/synthetic_checks.py": {
+      "sha256": "a2ebc62f5dab8dbe9c6495d396183092e991bf4c97256874d2930f26780197da",
+      "bytes": 22629
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/trainer_diff.patch": {
+      "sha256": "48022aa1345ac421f7df05f7947d2b977e9ea7773e45a6db6be43381ba3ff97d",
+      "bytes": 4584
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/boundary_report.json": {
+      "sha256": "c04684152857946e53432abe6ed667a247df8a1e70886591591d3bce02e89596",
+      "bytes": 148840
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/commands.json": {
+      "sha256": "bc1a68c8cc3554a5d43457696b528513d7801245d92382b33aad281014171cde",
+      "bytes": 5496
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/preflight_local.json": {
+      "sha256": "528dd0d18fb8849fd6bdc5f36e84f78121d72768b6f440162ecc4d743ffd7426",
+      "bytes": 151635
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/file_manifest.json": {
+      "sha256": "5be7b36f2a42a6d4e7b1eb7fa2fcd3097e17ca1bf1380098b8f2a5ab5bd5ba5c",
+      "bytes": 801
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_scene.npz": {
+      "sha256": "1ccd7ff1e6db4bb4f7e5098d04f036da4317fb703d68fa1f3f2509f732ea81b1",
+      "bytes": 16
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_transform.npz": {
+      "sha256": "6db40626b659ed5e2a55d9267d21d717c25828d4fe7effb44bde8a0f47b3076d",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/sample_index_map.npz": {
+      "sha256": "78052a157dcea8f541d76fe9e4b2b87c600f7c18015bfcec00f22817e24ad9a9",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_indices.npz": {
+      "sha256": "dfed409cc02c77d54581b241071855da0f7c9e47b9e7b7fb06be013ed682eecc",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_manifest.json": {
+      "sha256": "1591de26739cd20f497f85fa67f366a25b39578cbc76932b2cae4d9da9df1390",
+      "bytes": 48
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/validation_batch.npz": {
+      "sha256": "25d1b7e62d56f22ae520a4abcaf686c9aed99ca03150665166b672058f8265e0",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/SYNTHETIC_candidate_config.json": {
+      "sha256": "5b87be3b7378604e9eb4a586e99b4ed2d291e7ecb32c7211d2593e3b0b675a08",
+      "bytes": 51939
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/SYNTHETIC_comparison_cases.json": {
+      "sha256": "60783d1324c1ea4e028e6318c4964ea622cf627df03f506350e1228489d8f8b8",
+      "bytes": 4512
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/synthetic_logging/epoch_history.jsonl": {
+      "sha256": "d1f7b5cab5856554ebb789cbd349e8f38c88883c91a04e6051a2a7a3fe53c37f",
+      "bytes": 174
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/synthetic_logging/train_config.json": {
+      "sha256": "b5b59666905a664449f911d3887eb8018560ef55c529c0086fa4442b2af1b50d",
+      "bytes": 525
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/fixtures/SYNTHETIC_reference_config.json": {
+      "sha256": "3e43ab30414d6708995335968bdb61c4826ba660e08d1f8ffaf3267f400ad0e1",
+      "bytes": 51536
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_02/synthetic_cpu/synthetic_report.json": {
+      "sha256": "2c52687873adbe80f465a538c609f506e30ff39be18edf8ca4fb1b7a4f9e7dde",
+      "bytes": 163213
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/boundary_report.json": {
+      "sha256": "7852108169c80ccf6107ca031da96e92db1ed61fbebebcf5f3f2645cc56c1155",
+      "bytes": 150913
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/commands.json": {
+      "sha256": "a52fc267bd4ff711c4fe49f8a40e593ffcb51da3926907d6019a273c14343884",
+      "bytes": 5496
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/preflight_local.json": {
+      "sha256": "a127c2455b1a34529941bc884efe4017854074658a5fac2c4f7a2b1c5e22b4aa",
+      "bytes": 153772
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/file_manifest.json": {
+      "sha256": "5be7b36f2a42a6d4e7b1eb7fa2fcd3097e17ca1bf1380098b8f2a5ab5bd5ba5c",
+      "bytes": 801
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_scene.npz": {
+      "sha256": "1ccd7ff1e6db4bb4f7e5098d04f036da4317fb703d68fa1f3f2509f732ea81b1",
+      "bytes": 16
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_transform.npz": {
+      "sha256": "6db40626b659ed5e2a55d9267d21d717c25828d4fe7effb44bde8a0f47b3076d",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/sample_index_map.npz": {
+      "sha256": "78052a157dcea8f541d76fe9e4b2b87c600f7c18015bfcec00f22817e24ad9a9",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_indices.npz": {
+      "sha256": "dfed409cc02c77d54581b241071855da0f7c9e47b9e7b7fb06be013ed682eecc",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_manifest.json": {
+      "sha256": "1591de26739cd20f497f85fa67f366a25b39578cbc76932b2cae4d9da9df1390",
+      "bytes": 48
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/validation_batch.npz": {
+      "sha256": "25d1b7e62d56f22ae520a4abcaf686c9aed99ca03150665166b672058f8265e0",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/SYNTHETIC_candidate_config.json": {
+      "sha256": "5b87be3b7378604e9eb4a586e99b4ed2d291e7ecb32c7211d2593e3b0b675a08",
+      "bytes": 51939
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/SYNTHETIC_comparison_cases.json": {
+      "sha256": "60783d1324c1ea4e028e6318c4964ea622cf627df03f506350e1228489d8f8b8",
+      "bytes": 4512
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/synthetic_logging/epoch_history.jsonl": {
+      "sha256": "d1f7b5cab5856554ebb789cbd349e8f38c88883c91a04e6051a2a7a3fe53c37f",
+      "bytes": 174
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/synthetic_logging/train_config.json": {
+      "sha256": "b5b59666905a664449f911d3887eb8018560ef55c529c0086fa4442b2af1b50d",
+      "bytes": 525
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/fixtures/SYNTHETIC_reference_config.json": {
+      "sha256": "3e43ab30414d6708995335968bdb61c4826ba660e08d1f8ffaf3267f400ad0e1",
+      "bytes": 51536
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_03/synthetic_cpu/synthetic_report.json": {
+      "sha256": "001e2bdf4d7adbb2cb0cdca32c327e4ab75ed61faebdaf4b85b71388f858bd64",
+      "bytes": 165756
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/boundary_report.json": {
+      "sha256": "9ad48c71881a0f3470ad26889302d8e5e7fdb2458dbf057d347237d6f15a1f73",
+      "bytes": 153298
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/commands.json": {
+      "sha256": "fc9772568ab3728e58088bc5a3a3339e200c4c21a2fb8afa0988f99803f781f8",
+      "bytes": 5520
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/preflight_local.json": {
+      "sha256": "b867bf5ac887d954a07aa0c157532e2931328c32d5bf9ef2a5b6b24dbb822f9d",
+      "bytes": 156183
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/file_manifest.json": {
+      "sha256": "5be7b36f2a42a6d4e7b1eb7fa2fcd3097e17ca1bf1380098b8f2a5ab5bd5ba5c",
+      "bytes": 801
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_scene.npz": {
+      "sha256": "1ccd7ff1e6db4bb4f7e5098d04f036da4317fb703d68fa1f3f2509f732ea81b1",
+      "bytes": 16
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/pca_transform.npz": {
+      "sha256": "6db40626b659ed5e2a55d9267d21d717c25828d4fe7effb44bde8a0f47b3076d",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/sample_index_map.npz": {
+      "sha256": "78052a157dcea8f541d76fe9e4b2b87c600f7c18015bfcec00f22817e24ad9a9",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_indices.npz": {
+      "sha256": "dfed409cc02c77d54581b241071855da0f7c9e47b9e7b7fb06be013ed682eecc",
+      "bytes": 46
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/split_manifest.json": {
+      "sha256": "1591de26739cd20f497f85fa67f366a25b39578cbc76932b2cae4d9da9df1390",
+      "bytes": 48
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/FAKE_BYTES_NOT_DATA/validation_batch.npz": {
+      "sha256": "25d1b7e62d56f22ae520a4abcaf686c9aed99ca03150665166b672058f8265e0",
+      "bytes": 49
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/SYNTHETIC_candidate_config.json": {
+      "sha256": "5b87be3b7378604e9eb4a586e99b4ed2d291e7ecb32c7211d2593e3b0b675a08",
+      "bytes": 51939
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/SYNTHETIC_comparison_cases.json": {
+      "sha256": "60783d1324c1ea4e028e6318c4964ea622cf627df03f506350e1228489d8f8b8",
+      "bytes": 4512
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/synthetic_logging/epoch_history.jsonl": {
+      "sha256": "d1f7b5cab5856554ebb789cbd349e8f38c88883c91a04e6051a2a7a3fe53c37f",
+      "bytes": 174
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/synthetic_logging/train_config.json": {
+      "sha256": "8e46c72efd2151dfe8ac661f057ff13d4fb97fef1cd80a54e75bd9c91f55ce9e",
+      "bytes": 735
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/fixtures/SYNTHETIC_reference_config.json": {
+      "sha256": "3e43ab30414d6708995335968bdb61c4826ba660e08d1f8ffaf3267f400ad0e1",
+      "bytes": 51536
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verification_final/synthetic_cpu/synthetic_report.json": {
+      "sha256": "78fd9bb1c8cec5682f61beb3bef1fb2520634a83fed3b850ada9bf35701b9bef",
+      "bytes": 168124
+    },
+    "diagnostics/spatial_residual_gate_training_20261019/verify_delivery.py": {
+      "sha256": "640134a9d5cfda28c7135c60e4bf625cceba7b032ad8c7f3e0f4fa40bb54828d",
+      "bytes": 5272
+    }
+  }
+}

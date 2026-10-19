@@ -1,0 +1,15 @@
+{
+  "training_authorized": false,
+  "status": "prepared_not_executed",
+  "approved_by": null,
+  "approved_at": null,
+  "approved_commit": null,
+  "plan_sha256": null,
+  "runtime_file_sha256": {},
+  "assets_dir": null,
+  "output_dir": null,
+  "cuda_synthetic_report": null,
+  "cuda_synthetic_report_sha256": null,
+  "budget": {"candidate_runs": 1, "epochs_per_run": 200, "total_epochs": 200, "baseline_retraining": 0},
+  "note": "INERT TEMPLATE. Fill a separate reviewed approval only after user synchronization and explicit future authorization. No authorization granted by this file."
+}
